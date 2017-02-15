@@ -1,0 +1,54 @@
+# Build files
+/*/build
+/build
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+
+# Local config files
+/local.properties
+
+# Gradle files
+.gradle
+
+# IntelliJ configs
+.idea/libraries/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/.name
+.idea/compiler.xml
+.idea/copyright/profiles_settings.xml
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scopes/scope_settings.xml
+.idea/vcs.xml
+*.iml
+.navigation/
+
+# Logs
+*.log
+
+# Captures
+/captures
+
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+Thumbs.db
+
+# External native build folder
+.externalNativeBuild
+
+# Keystore files
+*.jks
+
+# Google Services
+google-services.json
