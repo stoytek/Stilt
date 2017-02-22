@@ -39,7 +39,11 @@ static SLObjectItf recObjItf = NULL;
 static SLRecordItf recItf;
 static SLAndroidSimpleBufferQueueItf recBufq;
 
-/* Buffer size 1s @ 44.1 kHz */
+/*
+ * Buffer size 1s @ 44.1 kHz. In combination with the callback that is called when
+ * the buffer is full, this ensures that we get exactly 1 second of audio each time
+ * startRecording() is called.
+ */
 #define RECORD_BUF_SIZE (44100)
 
 static short recBuf[RECORD_BUF_SIZE];
@@ -50,12 +54,12 @@ static unsigned recSize = 0;
 /* TODO: See if anything else needs to be done is this method */
 
 void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
-    assert(bq == recorderBufferQueue);
+    assert(bq == recBufq);
     assert(context == NULL);
     /* Stop the recording after filling the buffer */
     SLresult result = (*recItf)->SetRecordState(recItf, SL_RECORDSTATE_STOPPED);
     if (result == SL_RESULT_SUCCESS) {
-        recorderSize = RECORD_BUF_SIZE * sizeof(short);
+        recSize = RECORD_BUF_SIZE * sizeof(short);
     }
     pthread_mutex_unlock(&audioEngineLock);
 }
@@ -134,10 +138,36 @@ jboolean Java_com_stilt_stoytek_stilt_MainActivity_createAudioRecorder(JNIEnv* e
     result = (*recObjItf)->GetInterface(recObjItf, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recBufq);
     SLASSERT(result);
 
-    result = (*recObjItf)->RegisterCallback(recBufq, bqRecorderCallback, NULL);
+    result = (*recBufq)->RegisterCallback(recBufq, bqRecorderCallback, NULL);
     assert(result);
 
     return JNI_TRUE;
+}
+
+void Java_com_stilt_stoytek_stilt_MainActivity_startRecord(JNIEnv* env, jobject obj) {
+    SLresult result;
+
+    /*
+     * Try to aquire a lock on the audio engine. If it fails, simply return (no waiting
+     * for it to become available).
+     */
+    if (pthread_mutex_trylock(&audioEngineLock)) return;
+
+    /* Stop any ongoing recording and clear record buffer */
+
+    result = (*recItf)->SetRecordState(recItf, SL_RECORDSTATE_STOPPED);
+    SLASSERT(result);
+
+    result = (*recBufq)->Clear(recBufq);
+    SLASSERT(result);
+
+    recSize = 0;
+
+    result = (*recBufq)->Enqueue(recBufq, recBuf, RECORD_BUF_SIZE*sizeof(short));
+    SLASSERT(result);
+
+    result = (*recItf)->SetRecordState(recItf, SL_RECORDSTATE_RECORDING);
+    SLASSERT(result);
 }
 
 #ifdef __cplusplus
