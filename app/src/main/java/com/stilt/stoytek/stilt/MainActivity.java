@@ -16,9 +16,9 @@ public class MainActivity extends AppCompatActivity {
     
 
     // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("audio-recorde-jni");
-    }
+//    static {
+//        System.loadLibrary("audio-recorde-jni");
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,8 +26,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.lydbelastningsview);
 
         // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText("Hello world!");
+        //TextView tv = (TextView) findViewById(R.id.sample_text);
+        //tv.setText("Hello world!");
 
 
         //Graph stuff    https://youtu.be/zbTvJZX0UDk?t=3m47s
@@ -45,6 +45,17 @@ public class MainActivity extends AppCompatActivity {
         }
         graph.addSeries(series);
 
+
+        // graph test 2
+//        GraphView graph2 = (GraphView) findViewById(R.id.graphLyd2);
+//        LineGraphSeries<DataPoint> series2 = new LineGraphSeries<>(new DataPoint[] {
+//                new DataPoint(0, 1),
+//                new DataPoint(1, 5),
+//                new DataPoint(2, 3),
+//                new DataPoint(3, 2),
+//                new DataPoint(4, 6)
+//        });
+//        graph.addSeries(series2);
 
     }
 
