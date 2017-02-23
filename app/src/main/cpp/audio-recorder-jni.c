@@ -66,7 +66,7 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
 
 /* Create an audio engine interface */
 
-void Java_com_stilt_stoytek_stilt_MainActivity_createEngine(JNIEnv* env, jobject obj) {
+void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createEngine(JNIEnv* env, jobject obj) {
     SLresult result;
 
     result = slCreateEngine(&engineObjItf, 0, NULL, 0, NULL, NULL);
@@ -81,7 +81,7 @@ void Java_com_stilt_stoytek_stilt_MainActivity_createEngine(JNIEnv* env, jobject
 
 /* Create an audio recorder interface */
 
-jboolean Java_com_stilt_stoytek_stilt_MainActivity_createAudioRecorder(JNIEnv* env, jobject obj, jint sampleRate) {
+jboolean Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioRecorder(JNIEnv* env, jobject obj, jint sampleRate) {
     /* TODO: Implement a conversion from 'jint samplerate' to SL_SAMPLINGRATE_xx */
     SLresult result;
 
@@ -144,7 +144,7 @@ jboolean Java_com_stilt_stoytek_stilt_MainActivity_createAudioRecorder(JNIEnv* e
     return JNI_TRUE;
 }
 
-void Java_com_stilt_stoytek_stilt_MainActivity_startRecord(JNIEnv* env, jobject obj) {
+void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_startRecord(JNIEnv* env, jobject obj) {
     SLresult result;
 
     /*
@@ -168,6 +168,28 @@ void Java_com_stilt_stoytek_stilt_MainActivity_startRecord(JNIEnv* env, jobject 
 
     result = (*recItf)->SetRecordState(recItf, SL_RECORDSTATE_RECORDING);
     SLASSERT(result);
+}
+
+jintArray Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_getSupporteSampleRates(JNIEnv* env, jobject obj) {
+    SLresult result;
+    jintArray sampleRates;
+
+    /* Create an interface to get audio device capabilities */
+
+    SLAudioIODeviceCapabilitiesItf ioDevCapItf;
+    result = (*engineObjItf)->GetInterface(engineObjItf, SL_IID_AUDIOIODEVICECAPABILITIES, &ioDevCapItf);
+
+    SLASSERT(result);
+
+    SLAudioInputDescriptor pDesc;
+
+    result = (*ioDevCapItf)->QueryAudioInputCapabilities(ioDevCapItf, SL_DEFAULTDEVICEID_AUDIOINPUT, &pDesc);
+    SLASSERT(result);
+
+    sampleRates = (*env)->NewIntArray(env, pDesc.numOfSamplingRatesSupported);
+    (*env)->SetIntArrayRegion(env, sampleRates, 0, pDesc.numOfSamplingRatesSupported, pDesc.samplingRatesSupported);
+
+    return sampleRates;
 }
 
 #ifdef __cplusplus
