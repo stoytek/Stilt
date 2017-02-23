@@ -6,18 +6,11 @@ import android.widget.TextView;
 import android.media.AudioRecord;
 import android.media.AudioFormat;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
-
 public class MainActivity extends AppCompatActivity {
 
 
-    //Graph stuff
-    LineGraphSeries<DataPoint> series;
-    
 
-    // Used to load the 'native-lib' library on application startup.
+    /* Load the audio recorder native library */
     static {
         System.loadLibrary("audio-recorder-jni");
     }
@@ -25,29 +18,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lydbelastningsview);
+        setContentView(R.layout.activity_main);
 
         // Example of a call to a native method
         TextView tv = (TextView) findViewById(R.id.sample_text);
         tv.setText("Hello world!");
-
-
-        //Graph stuff    https://youtu.be/zbTvJZX0UDk?t=3m47s
-        double y;
-        double x;
-
-        x = 0;      // hvor på x-aksen grafen skal starte
-
-        GraphView graph = (GraphView) findViewById(R.id.graphLyd);
-        series = new LineGraphSeries<DataPoint>();
-        for (int i = 0; i < 100; i++) {
-            x = x + 0.1;
-            y = Math.sin(x);    // y er funksjonen
-            series.appendData(new DataPoint(x, y), true, 100);  // det siste tallet i appendData må være likt som antall loops i for-løkka
-        }
-        graph.addSeries(series);
-
-
     }
 
     /* Check for valid sample rates, pass highest possible samplerate to createAudioEngine */
