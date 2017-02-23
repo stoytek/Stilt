@@ -1,55 +1,70 @@
 package com.stilt.stoytek.stilt;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.media.AudioRecord;
 import android.media.AudioFormat;
 
-public class MainActivity extends AppCompatActivity {
+import com.stilt.stoytek.stilt.audiorec.AudioCallback;
+import com.stilt.stoytek.stilt.audiorec.AudioRecorder;
 
+import java.util.Arrays;
 
+public class MainActivity extends AppCompatActivity implements AudioCallback {
 
-    /* Load the audio recorder native library */
-    static {
-        System.loadLibrary("audio-recorder-jni");
-    }
+    private AudioRecorder recorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        recorder = new AudioRecorder();
+        Log.d("MainActivity", "Created new AudioRecorder object.");
+
+        recorder.createAudioRecorder();
+        Log.d("MainActivity", "Created audiorecorder native interface");
+
         // Example of a call to a native method
         TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText("Hello world!");
-    }
+        tv.setText(Integer.toString(recorder.getSampleRate()));
 
-    /* Check for valid sample rates, pass highest possible samplerate to createAudioEngine */
-    /* TODO: This might be possible to do with OpenSLES
-     *  SLAudioIODeviceCapabilitiesItf_->QuerySampleFormatsSupported(SLAudioIODeviceCapabilitiesItf self,
-	 *	SLuint32 deviceId,
-	 *	SLmilliHertz samplingRate,
-	 *	SLint32 *pSampleFormats,
-	 *	SLint32 *pNumOfSampleFormats);
-     */
-
-    private int getMaxSupportedSampleRate() {
-
-        final int validSampleRates[] = new int[] { 8000, 11025, 16000, 22050,
-                32000, 37800, 44056, 44100};
-
-        for (int i = 0; i < validSampleRates.length; i++) {
-            int result = AudioRecord.getMinBufferSize(validSampleRates[i],
-                    AudioFormat.CHANNEL_IN_DEFAULT,
-                    AudioFormat.ENCODING_DEFAULT);
-            if (result != AudioRecord.ERROR
-                    && result != AudioRecord.ERROR_BAD_VALUE && result > 0) {
-                return validSampleRates[i];
+        (findViewById(R.id.record)).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                int status = ActivityCompat.checkSelfPermission(MainActivity.this,
+                        Manifest.permission.RECORD_AUDIO);
+                if (status != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(
+                            MainActivity.this,
+                            new String[]{Manifest.permission.RECORD_AUDIO},
+                            0);
+                    return;
+                }
+                recordAudio();
             }
-        }
-
-        return -1;
+        });
     }
 
+    private void recordAudio() {
+        TextView tv = (TextView) findViewById(R.id.sample_text);
+        tv.setText("Recording");
+        Button button = (Button) findViewById(R.id.record);
+        button.setBackgroundColor(Color.RED);
+        recorder.recordSample(this);
+    }
+
+    @Override
+    public void notifyAudioReady() {
+        TextView tv = (TextView) findViewById(R.id.sample_text);
+        tv.setText("Audio is ready");
+        findViewById(R.id.record).setBackgroundColor(Color.GREEN);
+    }
 }

@@ -15,14 +15,7 @@ extern "C" {
 
 #include <pthread.h>
 
-/* Native audio headers */
-#include <SLES/OpenSLES.h>
-#include <SLES/OpenSLES_Android.h>
-
-/* Native asset manager */
-#include <sys/types.h>
-#include <android/asset_manager.h>
-#include <android/asset_manager_jni.h>
+#include <android/log.h>
 
 
 /* Engine interfaces */
@@ -49,33 +42,93 @@ static SLAndroidSimpleBufferQueueItf recBufq;
 static short recBuf[RECORD_BUF_SIZE];
 static unsigned recSize = 0;
 
+/* Java environment handles for use within the callback */
+static JavaVM* jAudioRecorderVM = NULL;
+static jobject jAudioRecorderObj = NULL;
+static pthread_mutex_t jAudioRecorderLock = PTHREAD_MUTEX_INITIALIZER;
+
 
 /* Callback called each time a buffer finishes recording */
 /* TODO: See if anything else needs to be done is this method */
 
 void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Entered callback function");
     assert(bq == recBufq);
     assert(context == NULL);
     /* Stop the recording after filling the buffer */
     SLresult result = (*recItf)->SetRecordState(recItf, SL_RECORDSTATE_STOPPED);
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Stopped recording");
     if (result == SL_RESULT_SUCCESS) {
         recSize = RECORD_BUF_SIZE * sizeof(short);
     }
+
+    /* TODO: Post event that audio is ready */
+
+    JNIEnv* env;
+    jint rs = (*jAudioRecorderVM)->AttachCurrentThread(jAudioRecorderVM, &env, NULL);
+    assert(rs == JNI_OK);
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Attached thread to VM");
+
+    /*
+     * FIXME: Unable to find classes in pure native threads (not on the Java stack). Need a pointer
+     * to a classloader that knows where to find the class we want.
+     * See https://stackoverflow.com/questions/13263340/findclass-from-any-thread-in-android-jni/16302771#16302771
+     * for a workaround
+     */
+
+    jclass clazz = (*env)->FindClass(env, "com/stilt/stoytek/stilt/audiorec/AudioRecorder");
+    assert(clazz != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Aquired class of calling object");
+
+    /* The rest of this should work fine */
+    jmethodID mid = (*env)->GetMethodID(env, clazz, "audioReady", "()V"); // Get methodID
+    assert(mid != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Aquired methodID");
+
+    (*env)->CallVoidMethod(env, jAudioRecorderObj, mid);
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Called AudioRecorder.audioReady()");
+
+    /* Destroy reference to object */
+    (*env)->DeleteGlobalRef(env, jAudioRecorderObj);
+    jAudioRecorderObj = NULL;
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Destroyed global reference to object");
+
+    /* Detach from VM */
+    (*jAudioRecorderVM)->DetachCurrentThread(jAudioRecorderVM);
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Detached thread from VM");
+
+    /* Destroy reference to VM */
+    (*env)->DeleteGlobalRef(env, jAudioRecorderVM);
+    jAudioRecorderVM = NULL;
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Destroyed global reference to VM");
+
+    /* Unlock mutexes */
     pthread_mutex_unlock(&audioEngineLock);
+    pthread_mutex_unlock(&jAudioRecorderLock);
+
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Unlocked engine and jAudioRecorder");
+
+
 }
 
 /* Create an audio engine interface */
 
 void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createEngine(JNIEnv* env, jobject obj) {
+
     SLresult result;
 
+    __android_log_write(ANDROID_LOG_DEBUG, "createEngine", "Created result variable.");
+
     result = slCreateEngine(&engineObjItf, 0, NULL, 0, NULL, NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "createEngine", "Instantiated engineObjItf.");
     SLASSERT(result);
 
     result = (*engineObjItf)->Realize(engineObjItf, SL_BOOLEAN_FALSE);
+    __android_log_write(ANDROID_LOG_DEBUG, "createEngine", "Realized engineObjItf.");
     SLASSERT(result);
 
     result = (*engineObjItf)->GetInterface(engineObjItf, SL_IID_ENGINE, &engineItf);
+    __android_log_write(ANDROID_LOG_DEBUG, "createEngine", "Instantiated engineItf.");
     SLASSERT(result);
 }
 
@@ -84,6 +137,8 @@ void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createEngine(JNIEnv* en
 jboolean Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioRecorder(JNIEnv* env, jobject obj, jint sampleRate) {
     /* TODO: Implement a conversion from 'jint samplerate' to SL_SAMPLINGRATE_xx */
     SLresult result;
+
+    __android_log_write(ANDROID_LOG_DEBUG, "createAudioRecorder", "Entered createAudioRecorder");
 
     /* Audio source */
     SLDataLocator_IODevice loc_dev = {
@@ -123,6 +178,9 @@ jboolean Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioRecorder
             id,
             req
     );
+
+    __android_log_write(ANDROID_LOG_DEBUG, "createAudioRecorder", "Created recObjItf, audioSrc and audioSnk");
+
     SLASSERT(result);
 
     result = (*recObjItf)->Realize(recObjItf, SL_BOOLEAN_FALSE);
@@ -132,14 +190,19 @@ jboolean Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioRecorder
         (void) result;
     }
 
+    __android_log_write(ANDROID_LOG_DEBUG, "createAudioRecorder", "Realized recObjItf");
+
     result = (*recObjItf)->GetInterface(recObjItf, SL_IID_RECORD, &recItf);
+    __android_log_write(ANDROID_LOG_DEBUG, "createAudioRecorder", "Created recItf");
     SLASSERT(result);
 
     result = (*recObjItf)->GetInterface(recObjItf, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &recBufq);
+    __android_log_write(ANDROID_LOG_DEBUG, "createAudioRecorder", "Created recBufq");
     SLASSERT(result);
 
     result = (*recBufq)->RegisterCallback(recBufq, bqRecorderCallback, NULL);
-    assert(result);
+    __android_log_write(ANDROID_LOG_DEBUG, "createAudioRecorder", "Registered recBufq callback");
+    SLASSERT(result);
 
     return JNI_TRUE;
 }
@@ -152,25 +215,43 @@ void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_startRecord(JNIEnv* env
      * for it to become available).
      */
     if (pthread_mutex_trylock(&audioEngineLock)) return;
+    if (pthread_mutex_trylock(&jAudioRecorderLock)) return;
+
+    __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Aquired lock on engine and jAudioRecorder");
+
+    /* Create temporary global references to the calling object */
+
+    jAudioRecorderObj = (*env)->NewGlobalRef(env, obj); // Create global reference to calling object
+    assert(jAudioRecorderObj != NULL);
+
+    (*env)->GetJavaVM(env, &jAudioRecorderVM); // Create a reference to the VM so we can attach to it later
+    assert(jAudioRecorderVM != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Aquired JavaVM reference");
 
     /* Stop any ongoing recording and clear record buffer */
 
     result = (*recItf)->SetRecordState(recItf, SL_RECORDSTATE_STOPPED);
+    __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Force-stopped recording");
     SLASSERT(result);
 
     result = (*recBufq)->Clear(recBufq);
+    __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Cleared recBufq");
     SLASSERT(result);
 
     recSize = 0;
 
     result = (*recBufq)->Enqueue(recBufq, recBuf, RECORD_BUF_SIZE*sizeof(short));
+    __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Enqueued recBuf");
     SLASSERT(result);
 
     result = (*recItf)->SetRecordState(recItf, SL_RECORDSTATE_RECORDING);
+    __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Recording started");
     SLASSERT(result);
 }
 
-jintArray Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_getSupporteSampleRates(JNIEnv* env, jobject obj) {
+/* FIXME: This doesn't work (result = SL_RESULT_FEATURE_UNSUPPORTED) */
+
+jintArray Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_getSupportedSampleRates(JNIEnv* env, jobject obj) {
     SLresult result;
     jintArray sampleRates;
 
@@ -179,16 +260,19 @@ jintArray Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_getSupporteSampleR
     SLAudioIODeviceCapabilitiesItf ioDevCapItf;
     result = (*engineObjItf)->GetInterface(engineObjItf, SL_IID_AUDIOIODEVICECAPABILITIES, &ioDevCapItf);
 
+    __android_log_write(ANDROID_LOG_DEBUG, "getSupportedSampleRates", "Got ioDevCapItf.");
+
     SLASSERT(result);
 
     SLAudioInputDescriptor pDesc;
 
     result = (*ioDevCapItf)->QueryAudioInputCapabilities(ioDevCapItf, SL_DEFAULTDEVICEID_AUDIOINPUT, &pDesc);
+    __android_log_write(ANDROID_LOG_DEBUG, "getSupportedSampleRates", "Got pDesc.");
     SLASSERT(result);
 
     sampleRates = (*env)->NewIntArray(env, pDesc.numOfSamplingRatesSupported);
     (*env)->SetIntArrayRegion(env, sampleRates, 0, pDesc.numOfSamplingRatesSupported, pDesc.samplingRatesSupported);
-
+    __android_log_write(ANDROID_LOG_DEBUG, "getSupportedSampleRates", "Got sampleRates.");
     return sampleRates;
 }
 
