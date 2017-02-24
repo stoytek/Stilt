@@ -10,6 +10,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            ldLibs "OpenSLES"
+        }
+
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11 -fexceptions"
