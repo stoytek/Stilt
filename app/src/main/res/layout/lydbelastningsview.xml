@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ligger i lomma"
+            android:id="@+id/liggerILommaSwitch"
+            android:checked="false"
+            android:layout_marginLeft="40dp" />
+
+        <Switch
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hørselvern"
+            android:id="@+id/hørselvernSwitch"
+            android:checked="false"
+            android:layout_marginLeft="60dp" />
+    </LinearLayout>
+
+    <com.jjoe64.graphview.GraphView
+        android:layout_width="match_parent"
+        android:layout_height="192dp"
+        android:id="@+id/graphLyd"/>
+
+    <com.jjoe64.graphview.GraphView
+        android:layout_width="match_parent"
+        android:layout_height="221dp"
+        android:id="@+id/graphLyd2"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start måling"
+        android:id="@+id/startMålingButton" />
+
+</LinearLayout>
