@@ -19,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     // Used to load the 'native-lib' library on application startup.
     static {
-        System.loadLibrary("audio-recorder-jni");
+        System.loadLibrary("audiorec");
     }
 
 
