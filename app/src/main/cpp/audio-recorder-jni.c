@@ -69,38 +69,38 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     /* TODO: Post event that audio is ready */
 
 
-    /* Attach the current thread to the JavaVM and get a reference to the JNI environment */
-    JNIEnv* env;
-    jint rs = (*jAudioRecorderVM)->AttachCurrentThread(jAudioRecorderVM, &env, NULL);
-    assert(rs == JNI_OK);
-    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Attached thread to VM");
-
-    /*
-     * FIXME: Unable to find classes in pure native threads (not on the Java stack). Need a pointer
-     * to a classloader that knows where to find the class we want.
-     * See https://stackoverflow.com/questions/13263340/findclass-from-any-thread-in-android-jni/16302771#16302771
-     * for a workaround
-     */
-
-    /* Use the cached ClassLoader to get a reference to the class */
-    jclass clazz = (*env)->CallObjectMethod(
-            env,
-            jClassLoader,
-            jFindClassMethod,
-            (*env)->NewStringUTF(env, "com/stilt/stoytek/stilt/audiorec/AudioRecorder")
-    );
-
-    assert(clazz != NULL);
-    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Got AudioRecorder class reference");
-
-    /* TODO: This is not working correctly, still cannot find a reference to the method */
-    //jmethodID callback = (*env)->GetMethodID(env, clazz, "audioReady", "(V)V");
-
-    (*env)->CallVoidMethod(env, jAudioRecorderObj, jCallbackMethod);
+//    /* Attach the current thread to the JavaVM and get a reference to the JNI environment */
+//    JNIEnv* env;
+//    jint rs = (*jAudioRecorderVM)->AttachCurrentThread(jAudioRecorderVM, &env, NULL);
+//    assert(rs == JNI_OK);
+//    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Attached thread to VM");
+//
+//    /*
+//     * FIXME: Unable to find classes in pure native threads (not on the Java stack). Need a pointer
+//     * to a classloader that knows where to find the class we want.
+//     * See https://stackoverflow.com/questions/13263340/findclass-from-any-thread-in-android-jni/16302771#16302771
+//     * for a workaround
+//     */
+//
+//    /* Use the cached ClassLoader to get a reference to the class */
+//    jclass clazz = (*env)->CallObjectMethod(
+//            env,
+//            jClassLoader,
+//            jFindClassMethod,
+//            (*env)->NewStringUTF(env, "com/stilt/stoytek/stilt/audiorec/AudioRecorder")
+//    );
+//
+//    assert(clazz != NULL);
+//    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Got AudioRecorder class reference");
+//
+//    /* TODO: This is not working correctly, still cannot find a reference to the method */
+//    //jmethodID callback = (*env)->GetMethodID(env, clazz, "audioReady", "(V)V");
+//
+//    (*env)->CallVoidMethod(env, jAudioRecorderObj, jCallbackMethod);
 
     /* Unlock mutexes */
     pthread_mutex_unlock(&audioEngineLock);
-    pthread_mutex_unlock(&jAudioRecorderLock);
+//    pthread_mutex_unlock(&jAudioRecorderLock);
 
     __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Unlocked engine and jAudioRecorder");
 
@@ -155,6 +155,16 @@ int storeReferences(JNIEnv* env, jobject obj) {
     __android_log_write(ANDROID_LOG_DEBUG, "storeReferences", "Got FindClass method reference");
 
     return SL_RESULT_SUCCESS;
+}
+
+/* This method is only meant to block the main app thread until the audio has finished recording */
+
+void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_waitForAudioBuffer(JNIEnv* env, jobject obj) {
+    __android_log_write(ANDROID_LOG_DEBUG, "waitForAudioBuffer", "Attempting to lock audioengine");
+    pthread_mutex_lock(&audioEngineLock);
+    __android_log_write(ANDROID_LOG_DEBUG, "waitForAudioBuffer", "Got lock on audioengine");
+    pthread_mutex_unlock(&audioEngineLock);
+    __android_log_write(ANDROID_LOG_DEBUG, "waitForAudioBuffer", "Unlocked audioengine");
 }
 
 /* Create an audio engine interface */
@@ -262,8 +272,8 @@ void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_startRecord(JNIEnv* env
      */
     if (pthread_mutex_trylock(&audioEngineLock)) return;
 
-    result = storeReferences(env, obj);
-    SLASSERT(result);
+    //result = storeReferences(env, obj);
+    //SLASSERT(result);
 
     __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Aquired lock on engine and jAudioRecorder");
 

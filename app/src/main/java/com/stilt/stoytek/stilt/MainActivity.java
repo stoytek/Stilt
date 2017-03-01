@@ -22,6 +22,8 @@ public class MainActivity extends AppCompatActivity implements AudioCallback {
 
     private AudioRecorder recorder;
 
+    private boolean recording = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +50,14 @@ public class MainActivity extends AppCompatActivity implements AudioCallback {
                             0);
                     return;
                 }
-                recordAudio();
+                recording = !recording;
+                if (recording) {
+                    ((TextView) findViewById(R.id.sample_text)).setText("Recording..");
+                    recordAudio();
+                    recording = false;
+                } else {
+                    ((TextView) findViewById(R.id.sample_text)).setText("Already recording!");
+                }
             }
         });
     }
