@@ -44,8 +44,12 @@ static unsigned recSize = 0;
 
 /* Java environment handles for use within the callback */
 static JavaVM* jAudioRecorderVM = NULL;
-static jobject jAudioRecorderObj = NULL;
+static jobject jAudioRecorderObj;
+static jobject jClassLoader;
+static jmethodID jFindClassMethod;
+static jmethodID jCallbackMethod;
 static pthread_mutex_t jAudioRecorderLock = PTHREAD_MUTEX_INITIALIZER;
+
 
 
 /* Callback called each time a buffer finishes recording */
@@ -64,6 +68,8 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
 
     /* TODO: Post event that audio is ready */
 
+
+    /* Attach the current thread to the JavaVM and get a reference to the JNI environment */
     JNIEnv* env;
     jint rs = (*jAudioRecorderVM)->AttachCurrentThread(jAudioRecorderVM, &env, NULL);
     assert(rs == JNI_OK);
@@ -76,31 +82,21 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
      * for a workaround
      */
 
-    jclass clazz = (*env)->FindClass(env, "com/stilt/stoytek/stilt/audiorec/AudioRecorder");
+    /* Use the cached ClassLoader to get a reference to the class */
+    jclass clazz = (*env)->CallObjectMethod(
+            env,
+            jClassLoader,
+            jFindClassMethod,
+            (*env)->NewStringUTF(env, "com/stilt/stoytek/stilt/audiorec/AudioRecorder")
+    );
+
     assert(clazz != NULL);
-    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Aquired class of calling object");
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Got AudioRecorder class reference");
 
-    /* The rest of this should work fine */
-    jmethodID mid = (*env)->GetMethodID(env, clazz, "audioReady", "()V"); // Get methodID
-    assert(mid != NULL);
-    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Aquired methodID");
+    /* TODO: This is not working correctly, still cannot find a reference to the method */
+    //jmethodID callback = (*env)->GetMethodID(env, clazz, "audioReady", "(V)V");
 
-    (*env)->CallVoidMethod(env, jAudioRecorderObj, mid);
-    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Called AudioRecorder.audioReady()");
-
-    /* Destroy reference to object */
-    (*env)->DeleteGlobalRef(env, jAudioRecorderObj);
-    jAudioRecorderObj = NULL;
-    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Destroyed global reference to object");
-
-    /* Detach from VM */
-    (*jAudioRecorderVM)->DetachCurrentThread(jAudioRecorderVM);
-    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Detached thread from VM");
-
-    /* Destroy reference to VM */
-    (*env)->DeleteGlobalRef(env, jAudioRecorderVM);
-    jAudioRecorderVM = NULL;
-    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Destroyed global reference to VM");
+    (*env)->CallVoidMethod(env, jAudioRecorderObj, jCallbackMethod);
 
     /* Unlock mutexes */
     pthread_mutex_unlock(&audioEngineLock);
@@ -109,6 +105,56 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Unlocked engine and jAudioRecorder");
 
 
+}
+
+int storeReferences(JNIEnv* env, jobject obj) {
+
+    /* Create temporary global references to the calling object */
+
+    /* Lock the object references */
+    if (pthread_mutex_trylock(&jAudioRecorderLock)) return SL_RESULT_UNKNOWN_ERROR;
+
+    /* Create a new global reference of the AudioRecorder object */
+    jAudioRecorderObj = (*env)->NewGlobalRef(env, obj); // Create global reference to calling object
+    assert(jAudioRecorderObj != NULL);
+
+    /* Create a reference to the JavaVM */
+    (*env)->GetJavaVM(env, &jAudioRecorderVM); // Create a reference to the VM so we can attach to it later
+    assert(jAudioRecorderVM != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "storeReferences", "Aquired JavaVM reference");
+
+    /* Get a reference to the AudioRecorder class */
+    jclass clazz = (*env)->FindClass(env, "com/stilt/stoytek/stilt/audiorec/AudioRecorder");
+    assert(clazz != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "storeReferences", "Got AudioRecorder class reference");
+
+    /* Get a reference to the Object class of AudioRecroder */
+    jclass clazzClazz = (*env)->GetObjectClass(env, clazz);
+    assert(clazzClazz != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "storeReferences", "Got AudioRecorder Object class reference");
+
+    /* Get a reference to the ClassLoader class */
+    jclass classLoaderClazz = (*env)->FindClass(env, "java/lang/ClassLoader");
+    assert(classLoaderClazz != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "storeReferences", "Got ClassLoader reference");
+
+    /* Get a reference to the getClassLoader method of ClassLoader */
+    jmethodID getClassLoaderMethod = (*env)->GetMethodID(env, clazzClazz, "getClassLoader",
+                                                      "()Ljava/lang/ClassLoader;");
+    assert(getClassLoaderMethod != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "storeReferences", "Got getClassLoaderMethod reference");
+
+    /* Get a reference to the ClassLoader of AudioRecorder */
+    jClassLoader = (*env)->NewGlobalRef(env, (*env)->CallObjectMethod(env, clazz, getClassLoaderMethod));
+    assert(jClassLoader != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "storeReferences", "Got AudioRecorder ClassLoader reference");
+
+    /* Get a reference to the FindClass method of ClassLoader */
+    jFindClassMethod = (*env)->GetMethodID(env, classLoaderClazz, "findClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+    assert(jFindClassMethod != NULL);
+    __android_log_write(ANDROID_LOG_DEBUG, "storeReferences", "Got FindClass method reference");
+
+    return SL_RESULT_SUCCESS;
 }
 
 /* Create an audio engine interface */
@@ -215,18 +261,11 @@ void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_startRecord(JNIEnv* env
      * for it to become available).
      */
     if (pthread_mutex_trylock(&audioEngineLock)) return;
-    if (pthread_mutex_trylock(&jAudioRecorderLock)) return;
+
+    result = storeReferences(env, obj);
+    SLASSERT(result);
 
     __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Aquired lock on engine and jAudioRecorder");
-
-    /* Create temporary global references to the calling object */
-
-    jAudioRecorderObj = (*env)->NewGlobalRef(env, obj); // Create global reference to calling object
-    assert(jAudioRecorderObj != NULL);
-
-    (*env)->GetJavaVM(env, &jAudioRecorderVM); // Create a reference to the VM so we can attach to it later
-    assert(jAudioRecorderVM != NULL);
-    __android_log_write(ANDROID_LOG_DEBUG, "startRecord", "Aquired JavaVM reference");
 
     /* Stop any ongoing recording and clear record buffer */
 

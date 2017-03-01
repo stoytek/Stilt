@@ -48,7 +48,7 @@ public class AudioRecorder {
         startRecord();
     }
 
-    /* TODO: See if there is another way of doing this. 
+    /* TODO: See if there is another way of doing this. */
 
     public void audioReady() {
         cbObj.notifyAudioReady();
