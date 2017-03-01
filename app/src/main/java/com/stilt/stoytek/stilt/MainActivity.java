@@ -1,14 +1,18 @@
 package com.stilt.stoytek.stilt;
 
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.media.AudioRecord;
 import android.media.AudioFormat;
 
 import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
@@ -50,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
         }
         graph.addSeries(series);
 
+        //fikser paddingen så alle tallene synes på y-aksen
+        GridLabelRenderer glr = graph.getGridLabelRenderer();
+        glr.setPadding(32); // should allow for 3 digits to fit on screen
+
 
         // graph test 2, ikke i bruk
 //        GraphView graph2 = (GraphView) findViewById(R.id.graphLyd2);
@@ -67,6 +75,14 @@ public class MainActivity extends AppCompatActivity {
         startMålingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startMålingButton.setText("Stopp måling");
+            }
+        });
+
+        View lydbelastningsVieww = findViewById(R.id.lydbelastningsView);
+        lydbelastningsVieww.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                // ... Respond to touch events
+                return true;
             }
         });
 
