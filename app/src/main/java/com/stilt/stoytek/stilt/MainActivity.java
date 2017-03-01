@@ -1,6 +1,8 @@
 package com.stilt.stoytek.stilt;
 
+import android.app.FragmentManager;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -16,7 +18,7 @@ import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
 
 
     //Graph stuff
@@ -28,11 +30,17 @@ public class MainActivity extends AppCompatActivity {
         System.loadLibrary("audiorec");
     }
 
+    ViewPager viewpager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.lydbelastningsview);
+        setContentView(R.layout.activity_main);
+
+        //ViewPager som fikser Swipe Views
+        viewpager = (ViewPager) findViewById(R.id.activity_main);
+        PagerAdapter padapter = new PagerAdapter(getSupportFragmentManager());
+        viewpager.setAdapter(padapter);
 
         // Example of a call to a native method
         //TextView tv = (TextView) findViewById(R.id.sample_text);
@@ -45,18 +53,18 @@ public class MainActivity extends AppCompatActivity {
 
         x = 0;      // hvor på x-aksen grafen skal starte
 
-        GraphView graph = (GraphView) findViewById(R.id.graphLyd);
-        series = new LineGraphSeries<DataPoint>();
-        for (int i = 0; i < 100; i++) {
-            x = x + 0.1;
-            y = Math.sin(x);    // y er funksjonen
-            series.appendData(new DataPoint(x, y), true, 100);  // det siste tallet i appendData må være likt som antall loops i for-løkka
-        }
-        graph.addSeries(series);
+//        GraphView graph = (GraphView) findViewById(R.id.graphLyd);
+//        series = new LineGraphSeries<DataPoint>();
+//        for (int i = 0; i < 100; i++) {
+//            x = x + 0.1;
+//            y = Math.sin(x);    // y er funksjonen
+//            series.appendData(new DataPoint(x, y), true, 100);  // det siste tallet i appendData må være likt som antall loops i for-løkka
+//        }
+//        graph.addSeries(series);
 
         //fikser paddingen så alle tallene synes på y-aksen
-        GridLabelRenderer glr = graph.getGridLabelRenderer();
-        glr.setPadding(32); // should allow for 3 digits to fit on screen
+//        GridLabelRenderer glr = graph.getGridLabelRenderer();
+//        glr.setPadding(32); // should allow for 3 digits to fit on screen
 
 
         // graph test 2, ikke i bruk
@@ -71,20 +79,20 @@ public class MainActivity extends AppCompatActivity {
 //        graph2.addSeries(series2);
 
 
-        final Button startMålingButton = (Button) findViewById(R.id.startMålingButton);
-        startMålingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startMålingButton.setText("Stopp måling");
-            }
-        });
-
-        View lydbelastningsVieww = findViewById(R.id.lydbelastningsView);
-        lydbelastningsVieww.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                // ... Respond to touch events
-                return true;
-            }
-        });
+//        final Button startMålingButton = (Button) findViewById(R.id.startMålingButton);
+//        startMålingButton.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View v) {
+//                startMålingButton.setText("Stopp måling");
+//            }
+//        });
+//
+//        View lydbelastningsVieww = findViewById(R.id.lydbelastningsView);
+//        lydbelastningsVieww.setOnTouchListener(new View.OnTouchListener() {
+//            public boolean onTouch(View v, MotionEvent event) {
+//                // ... Respond to touch events
+//                return true;
+//            }
+//        });
 
     }
 
