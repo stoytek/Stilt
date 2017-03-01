@@ -46,9 +46,6 @@ public class AudioRecorder {
     public void recordSample(AudioCallback callbackObject) {
         this.cbObj = callbackObject;
         startRecord();
-        /* FIXME: this busy-waits the entire app until audio is finished. Not very good. */
-        waitForAudioBuffer();
-        audioReady();
     }
 
     /* TODO: See if there is another way of doing this. */
@@ -85,10 +82,7 @@ public class AudioRecorder {
 
 
     /* Native methods */
-
     public static native void createEngine();
     public static native boolean createAudioRecorder(int samplerate);
-    public static native void startRecord();
-    private static native void waitForAudioBuffer();
-
+    public native void startRecord();
 }

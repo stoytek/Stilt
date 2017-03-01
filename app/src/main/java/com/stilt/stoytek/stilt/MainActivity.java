@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements AudioCallback {
     private AudioRecorder recorder;
 
     private boolean recording = false;
+    private boolean testColor = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,17 @@ public class MainActivity extends AppCompatActivity implements AudioCallback {
                 }
             }
         });
+
+        (findViewById(R.id.test_button)).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                if (testColor) {
+                    view.setBackgroundColor(Color.BLACK);
+                } else {
+                    view.setBackgroundColor(Color.CYAN);
+                }
+                testColor = !testColor;
+            }
+        });
     }
 
     private void recordAudio() {
@@ -72,8 +84,13 @@ public class MainActivity extends AppCompatActivity implements AudioCallback {
 
     @Override
     public void notifyAudioReady() {
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText("Audio is ready");
-        findViewById(R.id.record).setBackgroundColor(Color.GREEN);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView tv = (TextView) findViewById(R.id.sample_text);
+                tv.setText("Audio is ready");
+                findViewById(R.id.record).setBackgroundColor(Color.GREEN);
+            }
+        });
     }
 }
