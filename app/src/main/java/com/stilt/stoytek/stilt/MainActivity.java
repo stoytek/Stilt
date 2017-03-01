@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         graph.addSeries(series);
 
 
-        // graph test 2
+        // graph test 2, ikke i bruk
 //        GraphView graph2 = (GraphView) findViewById(R.id.graphLyd2);
 //        LineGraphSeries<DataPoint> series2 = new LineGraphSeries<>(new DataPoint[] {
 //                new DataPoint(0, 1),
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 //                new DataPoint(3, 2),
 //                new DataPoint(4, 6)
 //        });
-//        graph.addSeries(series2);
+//        graph2.addSeries(series2);
 
     }
 
