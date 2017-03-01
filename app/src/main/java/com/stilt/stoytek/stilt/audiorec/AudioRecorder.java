@@ -52,6 +52,7 @@ public class AudioRecorder {
 
     public void audioReady() {
         cbObj.notifyAudioReady();
+        createAudioPlayer();
     }
 
     private List<Integer> getSupportedSampleRates() {
@@ -84,5 +85,8 @@ public class AudioRecorder {
     /* Native methods */
     public static native void createEngine();
     public static native boolean createAudioRecorder(int samplerate);
+    public static native void destroy();
+    public static native void createAudioPlayer();
+
     public native void startRecord();
 }
