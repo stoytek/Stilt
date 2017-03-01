@@ -2,6 +2,8 @@ package com.stilt.stoytek.stilt;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.media.AudioRecord;
 import android.media.AudioFormat;
@@ -59,6 +61,14 @@ public class MainActivity extends AppCompatActivity {
 //                new DataPoint(4, 6)
 //        });
 //        graph2.addSeries(series2);
+
+
+        final Button startMålingButton = (Button) findViewById(R.id.startMålingButton);
+        startMålingButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startMålingButton.setText("Stopp måling");
+            }
+        });
 
     }
 
