@@ -1,6 +1,5 @@
 package com.stilt.stoytek.stilt.audiorec;
 
-import android.media.AudioManager;
 import android.util.Log;
 
 import android.media.AudioRecord;
@@ -17,7 +16,7 @@ import java.util.List;
 public class AudioRecorder {
 
     private int sampleRate; // Samplerate used when recording
-    private AudioCallback callbackObject;
+    private AudioCallback cbObj; // Object to notify when audio is ready
 
 
     /* Load JNI native library */
@@ -45,16 +44,14 @@ public class AudioRecorder {
     }
 
     public void recordSample(AudioCallback callbackObject) {
-        this.callbackObject = callbackObject;
+        this.cbObj = callbackObject;
         startRecord();
     }
 
-    public void audioReady() {
-        callbackObject.notifyAudioReady();
-    }
+    /* TODO: See if there is another way of doing this. 
 
-    public int testMethod(int i) {
-        return i;
+    public void audioReady() {
+        cbObj.notifyAudioReady();
     }
 
     private List<Integer> getSupportedSampleRates() {
