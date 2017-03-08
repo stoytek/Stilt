@@ -5,6 +5,7 @@
 #ifndef STILT_AUDIO_RECORDER_JNI_H
 #define STILT_AUDIO_RECORDER_JNI_H
 
+#include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
 
 #define SLASSERT(x)   do {\
