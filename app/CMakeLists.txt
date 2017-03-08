@@ -30,7 +30,9 @@ find_library( log-lib log )
 # can link multiple libraries, such as libraries you define in the
 # build script, prebuilt third-party libraries, or system libraries.
 
+
 target_link_libraries( audiorec
+
                        OpenSLES
                        android
                        ${log-lib} )

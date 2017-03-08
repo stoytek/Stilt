@@ -1,85 +1,86 @@
 package com.stilt.stoytek.stilt;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.view.MotionEvent;
 import android.widget.TextView;
-import android.media.AudioRecord;
-import android.media.AudioFormat;
 
 import com.stilt.stoytek.stilt.audiorec.AudioCallback;
-import com.stilt.stoytek.stilt.audiorec.AudioRecorder;
 
-import java.util.Arrays;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GridLabelRenderer;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 public class MainActivity extends AppCompatActivity implements AudioCallback {
 
-    private AudioRecorder recorder;
+    //Graph stuff
+    LineGraphSeries<DataPoint> series;
 
-    private boolean recording = false;
-    private boolean testColor = false;
+    // Used to load the 'native-lib' library on application startup.
+    static {
+        System.loadLibrary("audiorec");
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        recorder = new AudioRecorder();
-        Log.d("MainActivity", "Created new AudioRecorder object.");
-
-        recorder.createAudioRecorder();
-        Log.d("MainActivity", "Created audiorecorder native interface");
+        setContentView(R.layout.lydbelastningsview);
 
         // Example of a call to a native method
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText(Integer.toString(recorder.getSampleRate()));
+        //TextView tv = (TextView) findViewById(R.id.sample_text);
+        //tv.setText("Hello world!");
 
-        (findViewById(R.id.record)).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                int status = ActivityCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.RECORD_AUDIO);
-                if (status != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(
-                            MainActivity.this,
-                            new String[]{Manifest.permission.RECORD_AUDIO},
-                            0);
-                    return;
-                }
-                recording = !recording;
-                if (recording) {
-                    ((TextView) findViewById(R.id.sample_text)).setText("Recording..");
-                    recordAudio();
-                    recording = false;
-                } else {
-                    ((TextView) findViewById(R.id.sample_text)).setText("Already recording!");
-                }
+        //Graph stuff    https://youtu.be/zbTvJZX0UDk?t=3m47s
+        double y;
+        double x;
+
+        x = 0;      // hvor på x-aksen grafen skal starte
+
+        GraphView graph = (GraphView) findViewById(R.id.graphLyd);
+        series = new LineGraphSeries<DataPoint>();
+        for (int i = 0; i < 100; i++) {
+            x = x + 0.1;
+            y = Math.sin(x);    // y er funksjonen
+            series.appendData(new DataPoint(x, y), true, 100);  // det siste tallet i appendData må være likt som antall loops i for-løkka
+        }
+        graph.addSeries(series);
+
+        //fikser paddingen så alle tallene synes på y-aksen
+        GridLabelRenderer glr = graph.getGridLabelRenderer();
+        glr.setPadding(32); // should allow for 3 digits to fit on screen
+
+
+        // graph test 2, ikke i bruk
+//        GraphView graph2 = (GraphView) findViewById(R.id.graphLyd2);
+//        LineGraphSeries<DataPoint> series2 = new LineGraphSeries<>(new DataPoint[] {
+//                new DataPoint(0, 1),
+//                new DataPoint(1, 5),
+//                new DataPoint(2, 3),
+//                new DataPoint(3, 2),
+//                new DataPoint(4, 6)
+//        });
+//        graph2.addSeries(series2);
+
+
+        final Button startMålingButton = (Button) findViewById(R.id.startMålingButton);
+        startMålingButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startMålingButton.setText("Stopp måling");
             }
         });
 
-        (findViewById(R.id.test_button)).setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
-                if (testColor) {
-                    view.setBackgroundColor(Color.BLACK);
-                } else {
-                    view.setBackgroundColor(Color.CYAN);
-                }
-                testColor = !testColor;
+        View lydbelastningsVieww = findViewById(R.id.lydbelastningsView);
+        lydbelastningsVieww.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                // ... Respond to touch events
+                return true;
             }
         });
-    }
-
-    private void recordAudio() {
-        TextView tv = (TextView) findViewById(R.id.sample_text);
-        tv.setText("Recording");
-        Button button = (Button) findViewById(R.id.record);
-        button.setBackgroundColor(Color.RED);
-        recorder.recordSample(this);
     }
 
     @Override
