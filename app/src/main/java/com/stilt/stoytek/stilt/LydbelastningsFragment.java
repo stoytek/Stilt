@@ -1,11 +1,14 @@
 package com.stilt.stoytek.stilt;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
@@ -17,6 +20,8 @@ public class LydbelastningsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.lydbelastningsview,container,false);
+
+
 
 
         //Graph stuff
@@ -53,6 +58,12 @@ public class LydbelastningsFragment extends Fragment {
 //                new DataPoint(4, 6)
 //        });
 //        graph2.addSeries(series2);
+
+        //setter texten bold og underllned
+        TextView textLydbelastning = (TextView) view.findViewById(R.id.lydbelastningsText);
+        textLydbelastning.setTypeface(null, Typeface.BOLD);
+        String htmlString="<u>Lydbelastning</u>";
+        textLydbelastning.setText(Html.fromHtml(htmlString));
 
 
         final Button startMålingButton = (Button) view.findViewById(R.id.startMålingButton);
