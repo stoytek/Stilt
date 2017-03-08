@@ -216,6 +216,7 @@ jboolean Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioRecorder
     /* Audio sink locator */
     SLDataLocator_AndroidSimpleBufferQueue loc_bq = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
 
+    /* TODO: Perhaps set byteorder to bigendian? */
     SLDataFormat_PCM format_pcm = {
             SL_DATAFORMAT_PCM,
             1,
@@ -422,6 +423,21 @@ void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioPlayer(JNIEn
     result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_PLAYING);
     assert(SL_RESULT_SUCCESS == result);
     (void)result;
+
+    /* Destroy objects when done */
+//
+//    if (outputMixObject) {
+//        (*outputMixObject)->Destroy(outputMixObject);
+//        outputMixObject = NULL;
+//    }
+//
+//    if (bqPlayerObject) {
+//        (*bqPlayerObject)->Destroy(bqPlayerObject);
+//        bqPlayerObject = NULL;
+//        bqPlayerPlay = NULL;
+//        bqPlayerBufferQueue = NULL;
+//    }
+
 }
 
 
