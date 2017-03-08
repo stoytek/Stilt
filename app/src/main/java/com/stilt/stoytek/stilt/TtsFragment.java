@@ -6,13 +6,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class LydbelastningsView extends Fragment {
+public class TtsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // TODO Auto-generated method stub
-        return inflater.inflate(R.layout.lydbelastningsview,container,false);
+        return inflater.inflate(R.layout.ttsview,container,false);
     }
 
 

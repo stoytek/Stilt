@@ -12,8 +12,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
-        android:layout_marginBottom="15dp"
-        android:layout_marginTop="4dp">
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="8dp"
+        android:weightSum="1">
 
         <Switch
             android:layout_width="wrap_content"
@@ -21,18 +22,20 @@
             android:text="Ligger i lomma"
             android:id="@+id/liggerILommaSwitch"
             android:checked="false"
-            android:layout_marginRight="50dp" />
+            android:layout_marginRight="50dp"
+            android:layout_weight="0.09" />
 
         <Switch
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Hørselvern"
             android:id="@+id/hørselvernSwitch"
-            android:checked="false" />
+            android:checked="false"
+            android:layout_weight="0.10" />
     </LinearLayout>
 
     <com.jjoe64.graphview.GraphView
-        android:layout_width="340dp"
+        android:layout_width="match_parent"
         android:layout_height="174dp"
         android:id="@+id/graphLyd"
         android:layout_marginLeft="20dp"
@@ -135,7 +138,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Fun fact hahahhahahhahahhahahhahahhahahhahahhahahhahahhahahhahahhahahhahahhahahhahahhahahhahah"
+            android:text="Fun fact hahah hahahhah ahhahahha hahhahahh ahahhahah hahahhaha hhahahhaha hhahahha hahhahahh ahahhahah hahahahah ahhaha ahaha ahah ahaa ahaaha haaha hahahha"
             android:id="@+id/funfactText"
             android:layout_gravity="left|top"
             android:background="@drawable/layout_border"

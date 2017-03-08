@@ -16,9 +16,9 @@ public class PagerAdapter extends FragmentPagerAdapter {
 
         switch (arg0) {
             case 0:
-                return new LydbelastningsView();
+                return new LydbelastningsFragment();
             case 1:
-                return new TtsView();
+                return new TtsFragment();
 
             default:
                 break;
