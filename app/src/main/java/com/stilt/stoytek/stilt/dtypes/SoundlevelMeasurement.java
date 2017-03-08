@@ -1,6 +1,6 @@
 package com.stilt.stoytek.stilt.dtypes;
 
-import java.sql.Timestamp;
+import java.util.GregorianCalendar;
 
 /**
  * Created by frodeja on 08/03/17.
@@ -9,7 +9,7 @@ import java.sql.Timestamp;
 public class SoundlevelMeasurement {
 
     private double dBval;
-    private Timestamp timestamp;
+    private GregorianCalendar timestamp;
 
     /* Add other metadata as necessary */
 
@@ -18,7 +18,7 @@ public class SoundlevelMeasurement {
         this.timestamp = null;
     }
 
-    public SoundlevelMeasurement(double dBval, Timestamp timestamp) {
+    public SoundlevelMeasurement(double dBval, GregorianCalendar timestamp) {
         this.dBval = dBval;
         this.timestamp = timestamp;
     }
@@ -27,15 +27,19 @@ public class SoundlevelMeasurement {
         return dBval;
     }
 
-    public Timestamp getTimestamp() {
+    public GregorianCalendar getTimestamp() {
         return timestamp;
+    }
+
+    public long getTimestampMillis() {
+        return timestamp.getTimeInMillis();
     }
 
     public void setdBval(double dBval) {
         this.dBval = dBval;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(GregorianCalendar timestamp) {
         this.timestamp = timestamp;
     }
 
