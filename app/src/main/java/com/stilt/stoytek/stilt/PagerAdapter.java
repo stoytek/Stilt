@@ -19,6 +19,8 @@ public class PagerAdapter extends FragmentPagerAdapter {
                 return new LydbelastningsFragment();
             case 1:
                 return new TtsFragment();
+            case 2:
+                return new InfosideFragment();
 
             default:
                 break;
@@ -29,7 +31,7 @@ public class PagerAdapter extends FragmentPagerAdapter {
     @Override
     public int getCount() {
 
-        return 2;       //hvor mange views man har
+        return 3;       //hvor mange views man har
     }
 
 

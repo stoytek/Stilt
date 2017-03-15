@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/infoside">
+
+    <!-- Clickable title -->
+    <TextView
+        android:id="@+id/title1"
+        android:text="jaja"
+        android:clickable="true"
+        android:onClick="toggle_contents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!--content to hide/show -->
+    <TextView
+        android:id="@+id/text11"
+        android:text="heiheiheihei heiheiheiheiheihei heiheiheihei heiheiheiheiheiheiheihei heiheiheiheiheihei heihei"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- Clickable title -->
+    <TextView
+        android:id="@+id/title2"
+        android:text="yeyey"
+        android:clickable="true"
+        android:onClick="toggle_contents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!--content to hide/show -->
+    <TextView
+        android:id="@+id/text21"
+        android:text="yupyup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>
