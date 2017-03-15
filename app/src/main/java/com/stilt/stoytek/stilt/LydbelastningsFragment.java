@@ -24,40 +24,66 @@ public class LydbelastningsFragment extends Fragment {
 
 
 
-        //Graph stuff
-        LineGraphSeries<DataPoint> series;
+//        //Graph stuff
+//        LineGraphSeries<DataPoint> series;
+//
+//        //Graph stuff    https://youtu.be/zbTvJZX0UDk?t=3m47s
+//        double y;
+//        double x;
+//
+//        x = 0;      // hvor på x-aksen grafen skal starte
 
-        //Graph stuff    https://youtu.be/zbTvJZX0UDk?t=3m47s
-        double y;
-        double x;
+//        GraphView graph = (GraphView) view.findViewById(R.id.graphLyd);
+//        series = new LineGraphSeries<DataPoint>();
+//        for (int i = 0; i < 100; i++) {
+//            x = x + 0.1;
+//            y = Math.sin(x);    // y er funksjonen
+//            series.appendData(new DataPoint(x, y), true, 100);  // det siste tallet i appendData må være likt som antall loops i for-løkka
+//        }
+//        graph.addSeries(series);
+//
+//
 
-        x = 0;      // hvor på x-aksen grafen skal starte
 
+
+        // graph test 2, ikke i bruk
         GraphView graph = (GraphView) view.findViewById(R.id.graphLyd);
-        series = new LineGraphSeries<DataPoint>();
-        for (int i = 0; i < 100; i++) {
-            x = x + 0.1;
-            y = Math.sin(x);    // y er funksjonen
-            series.appendData(new DataPoint(x, y), true, 100);  // det siste tallet i appendData må være likt som antall loops i for-løkka
-        }
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
+                new DataPoint(0, 1),
+                new DataPoint(1, 3),
+                new DataPoint(3, 20),
+                new DataPoint(4, 10),
+                new DataPoint(5, 6)
+        });
         graph.addSeries(series);
-
 
         //fikser paddingen så alle tallene synes på y-aksen
         GridLabelRenderer glr = graph.getGridLabelRenderer();
         glr.setPadding(32); // should allow for 3 digits to fit on screen
 
+        // activate horizontal zooming and scrolling
+//        graph.getViewport().setScalable(true);
 
-        // graph test 2, ikke i bruk
-//        GraphView graph2 = (GraphView) view.findViewById(R.id.graphLyd2);
-//        LineGraphSeries<DataPoint> series2 = new LineGraphSeries<>(new DataPoint[] {
-//                new DataPoint(0, 1),
-//                new DataPoint(1, 5),
-//                new DataPoint(2, 3),
-//                new DataPoint(3, 2),
-//                new DataPoint(4, 6)
-//        });
-//        graph2.addSeries(series2);
+        // activate horizontal scrolling
+//        graph.getViewport().setScrollable(true);
+
+        // activate horizontal and vertical zooming and scrolling
+        graph.getViewport().setScalableY(true);
+
+        // activate vertical scrolling
+//        graph.getViewport().setScrollableY(true);
+
+
+//        // setter x-aksen manuelt
+//        graph.getViewport().setXAxisBoundsManual(true);
+//        graph.getViewport().setMinX(0.5);
+//        graph.getViewport().setMaxX(3.5);
+//
+//        // setter y-akssen manuelt
+//        graph.getViewport().setYAxisBoundsManual(true);
+//        graph.getViewport().setMinY(3.5);
+//        graph.getViewport().setMaxY(8);
+
 
         //setter texten bold og underllned
         TextView textLydbelastning = (TextView) view.findViewById(R.id.lydbelastningsText);
@@ -72,6 +98,10 @@ public class LydbelastningsFragment extends Fragment {
                 startMålingButton.setText("Stopp måling");
             }
         });
+
+
+
+
 
         return view;
     }
