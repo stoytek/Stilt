@@ -4,6 +4,7 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,9 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class LydbelastningsFragment extends Fragment {
 
@@ -100,8 +104,18 @@ public class LydbelastningsFragment extends Fragment {
         });
 
 
+        String[] funfacts = {
+                "hei dette er imperial march du du du dududuu dududuu",
+                "sap sap ching chong it's high noon",
+                "why so serious?"
+        };
 
+        TextView funfactText = (TextView) view.findViewById(R.id.funfactText);
 
+        Random rand = new Random();
+        int randomNum = rand.nextInt((2) + 1);
+
+        funfactText.setText(funfacts[randomNum]);
 
         return view;
     }
