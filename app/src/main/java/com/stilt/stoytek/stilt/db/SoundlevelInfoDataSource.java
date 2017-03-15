@@ -23,5 +23,17 @@ public class SoundlevelInfoDataSource {
         dbHelper = new SoundlevelInfoSQLiteHelper(context);
     }
 
+    public void open() {
+        db = dbHelper.getReadableDatabase();
+    }
+
+    public void close() {
+        dbHelper.close();
+    }
+
+    public String getFunFact(double eqdBLevel) {
+        return "<placeholder>";
+    }
+
 
 }
