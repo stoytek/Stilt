@@ -10,6 +10,7 @@ import com.stilt.stoytek.stilt.dtypes.SoundlevelMeasurement;
 
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
+import java.util.Random;
 
 /**
  * Created by frodeja on 08/03/17.
@@ -204,6 +205,26 @@ public class SoundlevelDataSource {
         tmp.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(SoundlevelSQLiteHelper.COLUMN_TIMESTAMP)));
         slm.setTimestamp(tmp);
         return slm;
+    }
+
+    /**
+     * Generates random data for the last 24 hours.
+     * @return Array of random SoundlevelMeasurements
+     */
+
+    private ArrayList<SoundlevelMeasurement> getRandomData() {
+        Random rand = new Random();
+        ArrayList<SoundlevelMeasurement> result = new ArrayList<SoundlevelMeasurement>();
+        long now = System.currentTimeMillis();
+        GregorianCalendar timestamp = new GregorianCalendar();
+        timestamp.setTimeInMillis(now);
+        timestamp.add(GregorianCalendar.DATE, -1);
+        while (timestamp.getTimeInMillis() < now) {
+            result.add(new SoundlevelMeasurement(rand.nextDouble()*94, timestamp));
+            timestamp.add(GregorianCalendar.MINUTE, 10);
+        }
+
+        return result;
     }
 
 }

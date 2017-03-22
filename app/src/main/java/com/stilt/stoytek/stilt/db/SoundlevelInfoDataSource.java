@@ -19,7 +19,6 @@ public class SoundlevelInfoDataSource {
     };
 
     public SoundlevelInfoDataSource(Context context) {
-        /* TODO: Add a static method in SoundlevelInfoSQLiteHelper to check if DB exists */
         dbHelper = new SoundlevelInfoSQLiteHelper(context);
     }
 
@@ -31,7 +30,12 @@ public class SoundlevelInfoDataSource {
         dbHelper.close();
     }
 
+    /* TODO: Implement this method */
     public String getFunFact(double eqdBLevel) {
+        return null;
+    }
+
+    public String getFooFact() {
         return "<placeholder>";
     }
 
