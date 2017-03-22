@@ -33,6 +33,4 @@ public class PagerAdapter extends FragmentPagerAdapter {
 
         return 3;       //hvor mange views man har
     }
-
-
 }

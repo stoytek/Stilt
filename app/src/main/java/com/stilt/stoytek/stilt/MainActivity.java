@@ -5,16 +5,16 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import com.stilt.stoytek.stilt.audiorec.AudioCallback;
-    
+import com.stilt.stoytek.stilt.audiorec.AudioRecorder;
+import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
+import com.stilt.stoytek.stilt.db.SoundlevelInfoDataSource;
+
 
 public class MainActivity extends FragmentActivity implements AudioCallback {
 
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("audiorec");
-    }
-
+    AudioRecorder audiorec;
+    SoundlevelInfoDataSource funfactSource;
+    SoundlevelDataSource soundLevelSource;
     ViewPager viewpager;
 
     @Override
@@ -27,21 +27,13 @@ public class MainActivity extends FragmentActivity implements AudioCallback {
         PagerAdapter padapter = new PagerAdapter(getSupportFragmentManager());
         viewpager.setAdapter(padapter);
 
-        // Example of a call to a native method
-        //TextView tv = (TextView) findViewById(R.id.sample_text);
-        //tv.setText("Hello world!");
-        
+        audiorec = new AudioRecorder();
+        funfactSource = new SoundlevelInfoDataSource(this.getApplicationContext());
+        soundLevelSource = new SoundlevelDataSource(this.getApplicationContext());
     }
 
     @Override
     public void notifyAudioReady() {
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                TextView tv = (TextView) findViewById(R.id.sample_text);
-//                tv.setText("Audio is ready");
-//                findViewById(R.id.record).setBackgroundColor(Color.GREEN);
-//            }
-//        });
+
     }
 }
