@@ -30,6 +30,7 @@ out/
 .idea/vcs.xml
 *.iml
 .navigation/
+.idea/dictionaries/
 
 # Logs
 *.log
