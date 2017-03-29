@@ -28,6 +28,21 @@ public class LydbelastningsFragment extends Fragment {
     OnLydbelastningListener mListener;
     Activity mActivity;
 
+    private int counter = 0;
+
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            if (funfactText != null) {
+                funfactText.setText(""+counter++);
+            }
+        }
+        else {
+            /* Do nothing */
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -150,4 +165,7 @@ public class LydbelastningsFragment extends Fragment {
     public interface OnLydbelastningListener {
         void setFunFactText();
     }
+
+
+
 }
