@@ -15,6 +15,17 @@ import com.jjoe64.graphview.GridLabelRenderer;
 public class TtsFragment extends Fragment {
 
     @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            /* Do something */
+        }
+        else {
+            /* Do nothing */
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.ttsview,container,false);
 

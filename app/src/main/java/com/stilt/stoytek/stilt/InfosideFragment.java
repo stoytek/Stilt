@@ -39,6 +39,16 @@ public class InfosideFragment extends Fragment {
             facts2
     };
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            /* Do something */
+        }
+        else {
+            /* Do nothing */
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
