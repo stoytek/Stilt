@@ -8,6 +8,9 @@ import android.media.AudioFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by frodeja on 23/02/17.
@@ -15,9 +18,12 @@ import java.util.List;
 
 public class AudioRecorder {
 
+    private final static String TAG = "AudioRecorder";
+
     private int sampleRate; // Samplerate used when recording
     private AudioCallback cbObj; // Object to notify when audio is ready
 
+    private double result = 0;
 
     /* Load JNI native library */
     static {
@@ -28,7 +34,6 @@ public class AudioRecorder {
         setSampleRate(0);
         Log.d("AudioRecorder", "Entered constructor.");
         createEngine();
-
     }
 
     public boolean createAudioRecorder() {
@@ -43,16 +48,15 @@ public class AudioRecorder {
         return success;
     }
 
-    public void recordSample(AudioCallback callbackObject) {
-        this.cbObj = callbackObject;
+    public void recordSample(AudioCallback cbObj) {
+        this.cbObj = cbObj;
         startRecord();
     }
 
-    /* TODO: See if there is another way of doing this. */
-
     public void audioReady() {
+        Log.d(TAG, "Got audio");
+        result = getResult();
         cbObj.notifyAudioReady();
-        createAudioPlayer();
     }
 
     private List<Integer> getSupportedSampleRates() {
@@ -81,12 +85,15 @@ public class AudioRecorder {
         this.sampleRate = sampleRate;
     }
 
+    public double getDBResult() {
+        return result;
+    }
 
     /* Native methods */
     public static native void createEngine();
     public static native boolean createAudioRecorder(int samplerate);
     public static native void destroy();
-    public static native void createAudioPlayer();
+    public static native double getResult();
 
     public native void startRecord();
 }
