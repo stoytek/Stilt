@@ -6,6 +6,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import com.stilt.stoytek.stilt.audiorec.AudioCallback;
 import com.stilt.stoytek.stilt.audiorec.AudioRecorder;
+import com.stilt.stoytek.stilt.audiorec.AudioRecorderWorker;
 import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
 import com.stilt.stoytek.stilt.db.SoundlevelInfoDataSource;
 import com.stilt.stoytek.stilt.dtypes.SoundlevelMeasurement;
@@ -15,10 +16,8 @@ import java.util.GregorianCalendar;
 
 public class MainActivity extends FragmentActivity implements AudioCallback {
 
-    AudioRecorder audiorec;
-    SoundlevelInfoDataSource funfactSource;
-    SoundlevelDataSource soundLevelSource;
     ViewPager viewpager;
+    AudioRecorderWorker worker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +29,10 @@ public class MainActivity extends FragmentActivity implements AudioCallback {
         PagerAdapter padapter = new PagerAdapter(getSupportFragmentManager());
         viewpager.setAdapter(padapter);
 
-        audiorec = new AudioRecorder();
-        funfactSource = new SoundlevelInfoDataSource(this.getApplicationContext());
-        soundLevelSource = new SoundlevelDataSource(this.getApplicationContext());
+        worker = new AudioRecorderWorker(this);
+        worker.start();
+
+
     }
 
     @Override
