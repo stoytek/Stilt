@@ -1,12 +1,16 @@
 package com.stilt.stoytek.stilt.dtypes;
 
+import android.support.annotation.NonNull;
+
+import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
+
 import java.util.GregorianCalendar;
 
 /**
  * Created by frodeja on 08/03/17.
  */
 
-public class SoundlevelMeasurement {
+public class SoundlevelMeasurement implements Comparable {
 
     private double dBval;
     private GregorianCalendar timestamp;
@@ -44,4 +48,8 @@ public class SoundlevelMeasurement {
     }
 
 
+    @Override
+    public int compareTo(@NonNull Object o) {
+        return (int) (this.getTimestampMillis() - ((SoundlevelMeasurement)o).getTimestampMillis());
+    }
 }
