@@ -6,18 +6,16 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.util.Log;
-
+import com.stilt.stoytek.stilt.audiorec.AudioRecorder;
+import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
+import com.stilt.stoytek.stilt.db.SoundlevelInfoDataSource;
 import com.stilt.stoytek.stilt.audiorec.AudioCallback;
-    
 
 public class MainActivity extends FragmentActivity implements AudioCallback, LydbelastningsFragment.OnLydbelastningListener {
 
-
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("audiorec");
-    }
-
+    AudioRecorder audiorec;
+    SoundlevelInfoDataSource funfactSource;
+    SoundlevelDataSource soundLevelSource;
     ViewPager viewpager;
     PagerAdapter padapter;
 
@@ -32,6 +30,7 @@ public class MainActivity extends FragmentActivity implements AudioCallback, Lyd
         padapter = new PagerAdapter(getSupportFragmentManager());
         viewpager.setAdapter(padapter);
 
+
         Log.wtf("Main", "samma d");
 
 //        LydbelastningsFragment lydbelastningsFragment = (LydbelastningsFragment) getSupportFragmentManager().findFragmentById(R.id.lydbelastningsView);
@@ -45,6 +44,11 @@ public class MainActivity extends FragmentActivity implements AudioCallback, Lyd
 //        lydbelastningsFragment.setFunFact();
 
         
+
+        audiorec = new AudioRecorder();
+        funfactSource = new SoundlevelInfoDataSource(this.getApplicationContext());
+        soundLevelSource = new SoundlevelDataSource(this.getApplicationContext());
+
     }
 
     public void setFunFactText() {
@@ -55,13 +59,6 @@ public class MainActivity extends FragmentActivity implements AudioCallback, Lyd
 
     @Override
     public void notifyAudioReady() {
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//                TextView tv = (TextView) findViewById(R.id.sample_text);
-//                tv.setText("Audio is ready");
-//                findViewById(R.id.record).setBackgroundColor(Color.GREEN);
-//            }
-//        });
+
     }
 }

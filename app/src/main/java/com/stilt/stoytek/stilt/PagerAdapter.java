@@ -42,6 +42,7 @@ public class PagerAdapter extends FragmentPagerAdapter {
         return 3;       //hvor mange views man har
     }
 
+
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         Log.wtf("PAgerAdapter", "instantiating item");
@@ -75,5 +76,6 @@ public class PagerAdapter extends FragmentPagerAdapter {
     public String getInfosideTag() {
         return infosideTag;
     }
+
 
 }
