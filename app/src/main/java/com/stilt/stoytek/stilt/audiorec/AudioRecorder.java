@@ -23,6 +23,8 @@ public class AudioRecorder {
     private int sampleRate; // Samplerate used when recording
     private AudioCallback cbObj; // Object to notify when audio is ready
 
+    private double result = 0;
+
     private Lock lock;
     private Condition audioReady;
 
@@ -64,6 +66,7 @@ public class AudioRecorder {
 
     public void audioReady() {
         Log.d(TAG, "Got audio");
+        result = getResult();
         cbObj.notifyAudioReady();
     }
 
@@ -93,11 +96,15 @@ public class AudioRecorder {
         this.sampleRate = sampleRate;
     }
 
+    public double getDBResult() {
+        return result;
+    }
 
     /* Native methods */
     public static native void createEngine();
     public static native boolean createAudioRecorder(int samplerate);
     public static native void destroy();
+    public static native double getResult();
 
     public native void startRecord();
 }

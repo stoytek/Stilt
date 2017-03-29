@@ -7,11 +7,14 @@ extern "C" {
 #endif
 
 #include "audio-recorder-jni.h"
+#include "sigproc.h"
 
 #include <jni.h>
 
 #include <assert.h>
 #include <string.h>
+#include <limits.h>
+#include <stdio.h>
 
 #include <pthread.h>
 
@@ -49,8 +52,17 @@ static jobject jClassLoader;
 static jmethodID jFindClassMethod;
 static pthread_mutex_t jAudioRecorderLock = PTHREAD_MUTEX_INITIALIZER;
 
+/* Decibel value */
+static double db = 0;
+
+
+/* Get the calculated decibel value */
+
+jdouble Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_getResult(JNIEnv* env, jobject obj) {
+    return db;
+}
+
 /* Callback called each time a buffer finishes recording */
-/* TODO: See if anything else needs to be done is this method */
 
 void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Entered callback function");
@@ -66,6 +78,20 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
         recSize = RECORD_BUF_SIZE * sizeof(short);
     }
     __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Stopped recording");
+
+    /** Normalize the samples and convert to double **/
+
+    double* normSamples = malloc(sizeof(double)*RECORD_BUF_SIZE);
+    for (int i = 0; i < RECORD_BUF_SIZE; i++) {
+        normSamples[i] = (double) recBuf[i] / (double) SHRT_MAX;
+    }
+
+    db = getdb(normSamples, RECORD_BUF_SIZE);
+
+    /* Output value of db to log, remove later */
+    char string[500];
+    sprintf(string, "Value of db = %f", db);
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", string);
 
     /******************************************************************************/
     /****** Callback to calling thread to notify it that the audio is ready *******/

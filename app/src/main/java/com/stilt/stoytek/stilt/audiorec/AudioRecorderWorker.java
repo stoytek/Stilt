@@ -17,7 +17,7 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
 
     private static final String TAG = "AudioRecorderWorker";
 
-    private final int waitTimeMillis = 1000*10; /* Wait 10 seconds between each recording */
+    private final int waitTimeMillis = 100; //1000*10; /* Wait 10 seconds between each recording */
     private boolean keepAlive;
 
     private AudioRecorder audioRecorder;
@@ -50,6 +50,9 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
             } finally {
                 lock.unlock();
             }
+
+            double result = audioRecorder.getDBResult();
+            Log.d(TAG, "Got result: " + result + " dB.");
 
             try {
                 sleep(waitTimeMillis);
