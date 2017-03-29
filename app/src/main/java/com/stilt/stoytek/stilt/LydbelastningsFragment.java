@@ -1,5 +1,7 @@
 package com.stilt.stoytek.stilt;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,6 +22,12 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class LydbelastningsFragment extends Fragment {
+
+
+    TextView funfactText;
+    OnLydbelastningListener mListener;
+    Activity mActivity;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -110,7 +118,7 @@ public class LydbelastningsFragment extends Fragment {
                 "why so serious?"
         };
 
-        TextView funfactText = (TextView) view.findViewById(R.id.funfactText);
+        funfactText = (TextView) view.findViewById(R.id.funfactText);
 
         Random rand = new Random();
         int randomNum = rand.nextInt((2) + 1);
@@ -118,5 +126,28 @@ public class LydbelastningsFragment extends Fragment {
         funfactText.setText(funfacts[randomNum]);
 
         return view;
+    }
+
+    public void setFunFact() {
+        funfactText.setText("IT'S WORKING!!");
+    }
+
+    //API Level >= 23
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mListener = (OnLydbelastningListener) context;
+    }
+
+    //API Level < 23
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mActivity = activity;
+        mListener = (OnLydbelastningListener) mActivity;
+    }
+
+    public interface OnLydbelastningListener {
+        void setFunFactText();
     }
 }

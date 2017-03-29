@@ -1,13 +1,16 @@
 package com.stilt.stoytek.stilt;
 
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.util.Log;
+
 import com.stilt.stoytek.stilt.audiorec.AudioCallback;
     
 
-public class MainActivity extends FragmentActivity implements AudioCallback {
+public class MainActivity extends FragmentActivity implements AudioCallback, LydbelastningsFragment.OnLydbelastningListener {
 
 
     // Used to load the 'native-lib' library on application startup.
@@ -16,6 +19,8 @@ public class MainActivity extends FragmentActivity implements AudioCallback {
     }
 
     ViewPager viewpager;
+    PagerAdapter padapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,13 +29,28 @@ public class MainActivity extends FragmentActivity implements AudioCallback {
 
         //ViewPager som fikser Swipe Views
         viewpager = (ViewPager) findViewById(R.id.activity_main);
-        PagerAdapter padapter = new PagerAdapter(getSupportFragmentManager());
+        padapter = new PagerAdapter(getSupportFragmentManager());
         viewpager.setAdapter(padapter);
 
-        // Example of a call to a native method
-        //TextView tv = (TextView) findViewById(R.id.sample_text);
-        //tv.setText("Hello world!");
+        Log.wtf("Main", "samma d");
+
+//        LydbelastningsFragment lydbelastningsFragment = (LydbelastningsFragment) getSupportFragmentManager().findFragmentById(R.id.lydbelastningsView);
+//        lydbelastningsFragment.setFunFact();
+
+//        LydbelastningsFragment lydbelastningsFragment = (LydbelastningsFragment) getSupportFragmentManager().findFragmentByTag(padapter.getLydbelastningsTag());
+//        Log.wtf("Main", padapter.getLydbelastningsTag());
+//        if (lydbelastningsFragment == null) {
+//            Log.wtf("Main", "fragment not found");
+//        }
+//        lydbelastningsFragment.setFunFact();
+
         
+    }
+
+    public void setFunFactText() {
+        Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.activity_main + ":" + 0);
+        LydbelastningsFragment oneFragment = (LydbelastningsFragment) page;
+        oneFragment.setFunFact();
     }
 
     @Override

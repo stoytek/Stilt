@@ -45,7 +45,7 @@ public class InfosideFragment extends Fragment {
         super.onCreate(savedInstanceState);
         View view = inflater.inflate(R.layout.infoside,container,false);
 
-        for (int i; i < factsMainList.length; i++) {
+        for (int i = 0; i < factsMainList.length; i++) {
 
         };
 
