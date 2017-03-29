@@ -179,7 +179,7 @@
             android:layout_width="130dp"
             android:layout_height="38dp"
             android:text="Start måling"
-            android:id="@+id/startMålingButton"
+            android:id="@+id/startMaalingButton"
             android:layout_marginLeft="20dp"
             android:background="@drawable/button_style"
             android:textColor="#ffffff"

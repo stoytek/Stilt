@@ -212,7 +212,7 @@ public class SoundlevelDataSource {
      * @return Array of random SoundlevelMeasurements
      */
 
-    private ArrayList<SoundlevelMeasurement> getRandomData() {
+    public ArrayList<SoundlevelMeasurement> getRandomData() {
         Random rand = new Random();
         ArrayList<SoundlevelMeasurement> result = new ArrayList<SoundlevelMeasurement>();
         long now = System.currentTimeMillis();

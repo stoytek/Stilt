@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.util.Log;
@@ -30,6 +31,10 @@ public class LydbelastningsFragment extends Fragment {
     TextView funfactText;
     OnLydbelastningListener mListener;
     Activity mActivity;
+    GraphView graph;
+    LineGraphSeries<DataPoint> series;
+    private final Handler mHandler = new Handler();
+    private Runnable mTimer;
 
     private int counter = 0;
 
@@ -77,8 +82,8 @@ public class LydbelastningsFragment extends Fragment {
 
 
         // graph test 2
-        GraphView graph = (GraphView) view.findViewById(R.id.graphLyd);
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
+        graph = (GraphView) view.findViewById(R.id.graphLyd);
+        series = new LineGraphSeries<>(new DataPoint[] {
                 new DataPoint(0, 1),
                 new DataPoint(1, 3),
                 new DataPoint(3, 20),
@@ -88,8 +93,8 @@ public class LydbelastningsFragment extends Fragment {
         graph.addSeries(series);
 
         //fikser paddingen så alle tallene synes på y-aksen
-        GridLabelRenderer glr = graph.getGridLabelRenderer();
-        glr.setPadding(32); // should allow for 3 digits to fit on screen
+//        GridLabelRenderer glr = graph.getGridLabelRenderer();
+//        glr.setPadding(32); // should allow for 3 digits to fit on screen
 
         // activate horizontal zooming and scrolling
 //        graph.getViewport().setScalable(true);
@@ -98,21 +103,21 @@ public class LydbelastningsFragment extends Fragment {
 //        graph.getViewport().setScrollable(true);
 
         // activate horizontal and vertical zooming and scrolling
-        graph.getViewport().setScalableY(true);
+//        graph.getViewport().setScalableY(true);
 
         // activate vertical scrolling
 //        graph.getViewport().setScrollableY(true);
 
 
 //        // setter x-aksen manuelt
-//        graph.getViewport().setXAxisBoundsManual(true);
-//        graph.getViewport().setMinX(0.5);
-//        graph.getViewport().setMaxX(3.5);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(150);
 //
 //        // setter y-akssen manuelt
-//        graph.getViewport().setYAxisBoundsManual(true);
-//        graph.getViewport().setMinY(3.5);
-//        graph.getViewport().setMaxY(8);
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinY(0);
+        graph.getViewport().setMaxY(100);
 
 
         //setter texten bold og underllned
@@ -122,10 +127,12 @@ public class LydbelastningsFragment extends Fragment {
         textLydbelastning.setText(Html.fromHtml(htmlString));
 
 
-        final Button startMålingButton = (Button) view.findViewById(R.id.startMålingButton);
-        startMålingButton.setOnClickListener(new View.OnClickListener() {
+        final Button startMaalingButton = (Button) view.findViewById(R.id.startMaalingButton);
+        startMaalingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                startMålingButton.setText("Stopp måling");
+                startMaalingButton.setText("Stopp måling");
+                ArrayList<SoundlevelMeasurement> randomData = getRandomData();
+                updateGraph(randomData);
             }
         });
 
@@ -150,13 +157,44 @@ public class LydbelastningsFragment extends Fragment {
         funfactText.setText("IT'S WORKING!!");
     }
 
-    public void updateGraph() {
-        SoundlevelDataSource soundlevelsrc = new SoundlevelDataSource(this.getActivity().getApplicationContext());
-        soundlevelsrc.open();
+    public ArrayList<SoundlevelMeasurement> getRandomData() {
+        SoundlevelDataSource soundlevelDataSrc = new SoundlevelDataSource(this.getActivity().getApplicationContext());
+        soundlevelDataSrc.open();
         GregorianCalendar now = new GregorianCalendar();
         now.setTimeInMillis(System.currentTimeMillis());
-        ArrayList<SoundlevelMeasurement> list = soundlevelsrc.getSoundlevelMeasurementsFrom24HourWindowBeforeDate(now);
-        soundlevelsrc.close();
+        //ArrayList<SoundlevelMeasurement> list = soundlevelDataSrc.getSoundlevelMeasurementsFrom24HourWindowBeforeDate(now);
+        ArrayList<SoundlevelMeasurement> randomData = soundlevelDataSrc.getRandomData();
+        soundlevelDataSrc.close();
+        Log.wtf("Lyd", "Random data list:" + randomData.get(0).getdBval());
+        Log.wtf("Lyd", "Random data list:" + randomData.get(0).getTimestamp());
+        return randomData;
+    }
+
+    public void updateGraph(final ArrayList<SoundlevelMeasurement> dataFromDB) {
+        graph.removeAllSeries();
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+        Log.wtf("Lyd", "" + dataFromDB.size());
+        for (int i = 0; i < dataFromDB.size(); i++) {
+            //series.appendData(new DataPoint(2 + i, 3 + i), true, 10000);
+            series.appendData(new DataPoint(i, dataFromDB.get(i).getdBval()), true, 1000000000);
+        }
+        graph.addSeries(series);
+
+        //den under kan brukes hvis det kræsjer
+
+//        mTimer = new Runnable() {
+//            @Override
+//            public void run() {
+//                graph.removeAllSeries();
+//                LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
+//                for (int i = 0; i < dataFromDB.size(); i++) {
+//                    series.appendData(new DataPoint(i, dataFromDB.get(i).getdBval()), true, 1000000000);
+//                }
+//                graph.addSeries(series);
+//                mHandler.postDelayed(this, 300);
+//            }
+//        };
+//        mHandler.postDelayed(mTimer, 300);
     }
 
 
