@@ -36,6 +36,7 @@ public class SoundlevelDataSource {
 
     public void close() {
         dbHelper.close();
+        db = null; /* Make db ready for garbage collection */
     }
 
     /**
