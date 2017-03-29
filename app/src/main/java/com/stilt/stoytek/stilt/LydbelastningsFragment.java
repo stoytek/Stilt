@@ -1,5 +1,7 @@
 package com.stilt.stoytek.stilt;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,11 +17,35 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
+import com.stilt.stoytek.stilt.dtypes.SoundlevelMeasurement;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.Random;
 
 public class LydbelastningsFragment extends Fragment {
+
+
+    TextView funfactText;
+    OnLydbelastningListener mListener;
+    Activity mActivity;
+
+    private int counter = 0;
+
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            if (funfactText != null) {
+                funfactText.setText(""+counter++);
+            }
+        }
+        else {
+            /* Do nothing */
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,7 +76,7 @@ public class LydbelastningsFragment extends Fragment {
 
 
 
-        // graph test 2, ikke i bruk
+        // graph test 2
         GraphView graph = (GraphView) view.findViewById(R.id.graphLyd);
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
                 new DataPoint(0, 1),
@@ -110,7 +136,7 @@ public class LydbelastningsFragment extends Fragment {
                 "why so serious?"
         };
 
-        TextView funfactText = (TextView) view.findViewById(R.id.funfactText);
+        funfactText = (TextView) view.findViewById(R.id.funfactText);
 
         Random rand = new Random();
         int randomNum = rand.nextInt((2) + 1);
@@ -119,4 +145,40 @@ public class LydbelastningsFragment extends Fragment {
 
         return view;
     }
+
+    public void setFunFact() {
+        funfactText.setText("IT'S WORKING!!");
+    }
+
+    public void updateGraph() {
+        SoundlevelDataSource soundlevelsrc = new SoundlevelDataSource(this.getActivity().getApplicationContext());
+        soundlevelsrc.open();
+        GregorianCalendar now = new GregorianCalendar();
+        now.setTimeInMillis(System.currentTimeMillis());
+        ArrayList<SoundlevelMeasurement> list = soundlevelsrc.getSoundlevelMeasurementsFrom24HourWindowBeforeDate(now);
+        soundlevelsrc.close();
+    }
+
+
+    //API Level >= 23
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mListener = (OnLydbelastningListener) context;
+    }
+
+    //API Level < 23
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mActivity = activity;
+        mListener = (OnLydbelastningListener) mActivity;
+    }
+
+    public interface OnLydbelastningListener {
+        void setFunFactText();
+    }
+
+
+
 }

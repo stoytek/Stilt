@@ -12,25 +12,30 @@
         <!-- Clickable title -->
         <TextView
             android:id="@+id/title1"
-            android:text="jaja"
+            android:text="Hvorfor fokus på lyd og hørsel?"
             android:clickable="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="20dp" />
 
         <!--content to hide/show -->
         <TextView
             android:id="@+id/text11"
-            android:text="heiheiheihei heiheiheiheiheihei heiheiheihei heiheiheiheiheiheiheihei heiheiheiheiheihei heihei"
+            android:text="Fakta hentet fra Arbeidstilsynet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+
 
         <!-- Clickable title -->
         <TextView
             android:id="@+id/title2"
-            android:text="yeyey"
+            android:text="Hvilke lover eksisterer for å motvirke hørselskader?"
             android:clickable="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:textStyle="bold" />
 
         <!--content to hide/show -->
         <TextView
