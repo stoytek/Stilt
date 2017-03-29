@@ -154,8 +154,13 @@ public class LydbelastningsFragment extends Fragment {
         return view;
     }
 
-    public void setFunFact() {
-        funfactText.setText("IT'S WORKING!!");
+    public void setFunFact(final String newText) {
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                funfactText.setText(newText);
+            }
+        });
     }
 
     public void updateGraph() {

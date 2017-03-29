@@ -51,7 +51,7 @@ public class MainActivity extends FragmentActivity implements AudioCallback, Lyd
     public void setFunFactText() {
         Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.activity_main + ":" + 0);
         LydbelastningsFragment oneFragment = (LydbelastningsFragment) page;
-        oneFragment.setFunFact();
+        oneFragment.setFunFact("");
     }
 
     @Override

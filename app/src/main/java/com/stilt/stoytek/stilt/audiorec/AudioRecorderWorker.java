@@ -1,8 +1,12 @@
 package com.stilt.stoytek.stilt.audiorec;
 
 import android.content.Context;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
+import com.stilt.stoytek.stilt.LydbelastningsFragment;
+import com.stilt.stoytek.stilt.R;
 import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
 import com.stilt.stoytek.stilt.dtypes.SoundlevelMeasurement;
 
@@ -22,6 +26,7 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
     private final int waitTimeMillis = 1000; /* Wait 10 seconds between each recording */
     private boolean keepAlive;
 
+    Context context;
     private AudioRecorder audioRecorder;
     private SoundlevelDataSource slSrc;
 
@@ -34,6 +39,7 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
 
 
     public AudioRecorderWorker(Context context) {
+        this.context = context;
         slSrc = new SoundlevelDataSource(context);
         keepAlive = true;
         lock = new ReentrantLock();
@@ -70,6 +76,9 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
             slSrc.close();
             Log.d(TAG, "Inserted sound level measurement into database, return code: "+rc);
 
+            Fragment page = ((FragmentActivity)context).getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.activity_main + ":" + 0);
+            LydbelastningsFragment oneFragment = (LydbelastningsFragment) page;
+            oneFragment.setFunFact(""+result+" dB");
 
             try {
                 sleep(waitTimeMillis);
