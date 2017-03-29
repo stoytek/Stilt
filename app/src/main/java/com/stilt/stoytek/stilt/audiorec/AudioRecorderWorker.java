@@ -4,7 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
+import com.stilt.stoytek.stilt.dtypes.SoundlevelMeasurement;
 
+import java.util.GregorianCalendar;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -17,7 +19,7 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
 
     private static final String TAG = "AudioRecorderWorker";
 
-    private final int waitTimeMillis = 100; //1000*10; /* Wait 10 seconds between each recording */
+    private final int waitTimeMillis = 1000; /* Wait 10 seconds between each recording */
     private boolean keepAlive;
 
     private AudioRecorder audioRecorder;
@@ -31,7 +33,7 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
         keepAlive = true;
         lock = new ReentrantLock();
         audioReady = lock.newCondition();
-        audioRecorder = new AudioRecorder(lock, audioReady);
+        audioRecorder = new AudioRecorder();
     }
 
     @Override
@@ -41,6 +43,7 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
         while (keepAlive) {
             lock.lock();
             audioRecorder.recordSample(this);
+            long now = System.currentTimeMillis();
             try {
                 Log.d(TAG, "Waiting...");
                 audioReady.await();
@@ -53,6 +56,14 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
 
             double result = audioRecorder.getDBResult();
             Log.d(TAG, "Got result: " + result + " dB.");
+
+            slSrc.open();
+            GregorianCalendar timestamp = new GregorianCalendar();
+            timestamp.setTimeInMillis(now);
+            long rc = slSrc.insertSoundlevelMeasurement(new SoundlevelMeasurement(result, timestamp));
+            slSrc.close();
+            Log.d(TAG, "Inserted sound level measurement into database, return code: "+rc);
+
 
             try {
                 sleep(waitTimeMillis);

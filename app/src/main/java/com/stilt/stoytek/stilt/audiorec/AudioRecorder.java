@@ -25,9 +25,6 @@ public class AudioRecorder {
 
     private double result = 0;
 
-    private Lock lock;
-    private Condition audioReady;
-
     /* Load JNI native library */
     static {
         System.loadLibrary("audiorec");
@@ -37,14 +34,6 @@ public class AudioRecorder {
         setSampleRate(0);
         Log.d("AudioRecorder", "Entered constructor.");
         createEngine();
-    }
-
-    public AudioRecorder(Lock lock, Condition condition) {
-        setSampleRate(0);
-        Log.d(TAG, "Entered second constructor.");
-        createEngine();
-        this.lock = lock;
-        this.audioReady = condition;
     }
 
     public boolean createAudioRecorder() {
