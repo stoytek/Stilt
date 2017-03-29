@@ -22,6 +22,7 @@ import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
 import com.stilt.stoytek.stilt.dtypes.SoundlevelMeasurement;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.Random;
 
@@ -110,14 +111,14 @@ public class LydbelastningsFragment extends Fragment {
 
 
 //        // setter x-aksen manuelt
-        graph.getViewport().setXAxisBoundsManual(true);
-        graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(150);
-//
+//        graph.getViewport().setXAxisBoundsManual(true);
+//        graph.getViewport().setMinX(0);
+//        graph.getViewport().setMaxX(160000);
+
 //        // setter y-akssen manuelt
-        graph.getViewport().setYAxisBoundsManual(true);
-        graph.getViewport().setMinY(0);
-        graph.getViewport().setMaxY(100);
+//        graph.getViewport().setYAxisBoundsManual(true);
+//        graph.getViewport().setMinY(0);
+//        graph.getViewport().setMaxY(100);
 
 
         //setter texten bold og underllned
@@ -132,6 +133,7 @@ public class LydbelastningsFragment extends Fragment {
             public void onClick(View v) {
                 startMaalingButton.setText("Stopp måling");
                 ArrayList<SoundlevelMeasurement> randomData = getRandomData();
+                Collections.sort(randomData);
                 updateGraph(randomData);
             }
         });
@@ -173,10 +175,19 @@ public class LydbelastningsFragment extends Fragment {
     public void updateGraph(final ArrayList<SoundlevelMeasurement> dataFromDB) {
         graph.removeAllSeries();
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>();
-        Log.wtf("Lyd", "" + dataFromDB.size());
+        GregorianCalendar now = new GregorianCalendar();
+        now.setTimeInMillis(System.currentTimeMillis());
+        Log.wtf("Lyd", "antall elementer: " + dataFromDB.size());
+        Log.wtf("Lyd", "timestampinmillis: " + dataFromDB.get(0).getTimestampMillis());
+        Log.wtf("Lyd", "timestampinmillis: " + dataFromDB.get(1).getTimestampMillis());
+        Log.wtf("Lyd", "timestampinmillis: " + dataFromDB.get(2).getTimestampMillis()/100000000);
+        Log.wtf("Lyd", "timestampinmillis: " + dataFromDB.get(3).getTimestampMillis()/100000000);
         for (int i = 0; i < dataFromDB.size(); i++) {
+            //Log.wtf("Liste", "" + dataFromDB.get(i).getTimestampMillis());
             //series.appendData(new DataPoint(2 + i, 3 + i), true, 10000);
-            series.appendData(new DataPoint(i, dataFromDB.get(i).getdBval()), true, 1000000000);
+            //dataen på x-aksen på addes i stigende rekkefølge
+            //dataene kan ikke være høyere enn int
+            series.appendData(new DataPoint(now.getTimeInMillis() - dataFromDB.get(i).getTimestampMillis(), dataFromDB.get(i).getdBval()), true, 1000000000);
         }
         graph.addSeries(series);
 

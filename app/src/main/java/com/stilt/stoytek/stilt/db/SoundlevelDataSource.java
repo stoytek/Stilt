@@ -220,7 +220,9 @@ public class SoundlevelDataSource {
         timestamp.setTimeInMillis(now);
         timestamp.add(GregorianCalendar.DATE, -1);
         while (timestamp.getTimeInMillis() < now) {
-            result.add(new SoundlevelMeasurement(rand.nextDouble()*94, timestamp));
+            GregorianCalendar localTimestamp = new GregorianCalendar();
+            localTimestamp.setTimeInMillis(timestamp.getTimeInMillis());
+            result.add(new SoundlevelMeasurement(rand.nextDouble()*94, localTimestamp));
             timestamp.add(GregorianCalendar.MINUTE, 10);
         }
 

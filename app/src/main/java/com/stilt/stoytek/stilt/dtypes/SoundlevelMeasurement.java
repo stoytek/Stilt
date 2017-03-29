@@ -50,6 +50,6 @@ public class SoundlevelMeasurement implements Comparable {
 
     @Override
     public int compareTo(@NonNull Object o) {
-        return (int) (this.getTimestampMillis() - ((SoundlevelMeasurement)o).getTimestampMillis());
+        return (int) (((SoundlevelMeasurement)o).getTimestampMillis() - this.getTimestampMillis());
     }
 }
