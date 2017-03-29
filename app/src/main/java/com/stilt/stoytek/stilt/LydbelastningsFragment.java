@@ -58,7 +58,7 @@ public class LydbelastningsFragment extends Fragment {
 
 
 
-        // graph test 2, ikke i bruk
+        // graph test 2
         GraphView graph = (GraphView) view.findViewById(R.id.graphLyd);
         LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
                 new DataPoint(0, 1),
