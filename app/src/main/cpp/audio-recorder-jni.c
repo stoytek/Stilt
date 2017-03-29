@@ -7,11 +7,14 @@ extern "C" {
 #endif
 
 #include "audio-recorder-jni.h"
+#include "sigproc.h"
 
 #include <jni.h>
 
 #include <assert.h>
 #include <string.h>
+#include <limits.h>
+#include <stdio.h>
 
 #include <pthread.h>
 
@@ -49,8 +52,17 @@ static jobject jClassLoader;
 static jmethodID jFindClassMethod;
 static pthread_mutex_t jAudioRecorderLock = PTHREAD_MUTEX_INITIALIZER;
 
+/* Decibel value */
+static double db = 0;
+
+
+/* Get the calculated decibel value */
+
+jdouble Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_getResult(JNIEnv* env, jobject obj) {
+    return db;
+}
+
 /* Callback called each time a buffer finishes recording */
-/* TODO: See if anything else needs to be done is this method */
 
 void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Entered callback function");
@@ -67,8 +79,22 @@ void bqRecorderCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
     }
     __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", "Stopped recording");
 
+    /** Normalize the samples and convert to double **/
+
+    double* normSamples = malloc(sizeof(double)*RECORD_BUF_SIZE);
+    for (int i = 0; i < RECORD_BUF_SIZE; i++) {
+        normSamples[i] = (double) recBuf[i] / (double) SHRT_MAX;
+    }
+
+    db = getdb(normSamples, RECORD_BUF_SIZE);
+
+    /* Output value of db to log, remove later */
+    char string[500];
+    sprintf(string, "Value of db = %f", db);
+    __android_log_write(ANDROID_LOG_DEBUG, "bqRecorderCallback", string);
+
     /******************************************************************************/
-    /******** Callback to main thread to notify it that the audio is ready ********/
+    /****** Callback to calling thread to notify it that the audio is ready *******/
     /******************************************************************************/
 
     /* Attach the current thread to the JavaVM and get a reference to the JNI environment */
@@ -342,89 +368,89 @@ void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_destroy(JNIEnv* env, jo
 /* TEST METHODS FOR VERIFYING THAT WE ACTUALLY GET SOME SOUND WHEN WE RECORD */
 
 
-static SLObjectItf outputMixObject = NULL;
-static SLObjectItf bqPlayerObject = NULL;
-static SLPlayItf bqPlayerPlay;
-static SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue;
-static SLmilliHertz bqPlayerSampleRate = 0;
-static jint bqPlayerBufSize = 0;
-
-void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
-    assert(bq == bqPlayerBufferQueue);
-    assert(NULL == context);
-    (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_STOPPED);
-    pthread_mutex_unlock(&audioEngineLock);
-}
-
-void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioPlayer(JNIEnv* env, jobject obj) {
-    SLresult result;
-
-    //bqPlayerSampleRate
-    bqPlayerBufSize = recSize;
-
-    // configure audio source
-    SLDataLocator_AndroidSimpleBufferQueue loc_bufq = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
-    SLDataFormat_PCM format_pcm = {SL_DATAFORMAT_PCM, 1, SL_SAMPLINGRATE_44_1,
-                                   SL_PCMSAMPLEFORMAT_FIXED_16, SL_PCMSAMPLEFORMAT_FIXED_16,
-                                   SL_SPEAKER_FRONT_CENTER, SL_BYTEORDER_LITTLEENDIAN};
-
-    SLDataSource audioSrc = {&loc_bufq, &format_pcm};
-
-    const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
-    const SLboolean req[1] = {SL_BOOLEAN_FALSE};
-    result = (*engineItf)->CreateOutputMix(engineItf, &outputMixObject, 1, ids, req);
-    SLASSERT(result);
-    result = (*outputMixObject)->Realize(outputMixObject, SL_BOOLEAN_FALSE);
-    SLASSERT(result);
-
-
-
-    // configure audio sink
-    SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, outputMixObject};
-    SLDataSink audioSnk = {&loc_outmix, NULL};
-
-
-
-    /*
-     * create audio player:
-     *     fast audio does not support when SL_IID_EFFECTSEND is required, skip it
-     *     for fast audio case
-     */
-    const SLInterfaceID ids2[3] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND,
-            /*SL_IID_MUTESOLO,*/};
-    const SLboolean req2[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE,
-            /*SL_BOOLEAN_TRUE,*/ };
-
-    result = (*engineItf)->CreateAudioPlayer(engineItf, &bqPlayerObject, &audioSrc, &audioSnk,
-                                                bqPlayerSampleRate ? 2 : 3, ids2, req2);
-    SLASSERT(result);
-
-    // realize the player
-    result = (*bqPlayerObject)->Realize(bqPlayerObject, SL_BOOLEAN_FALSE);
-    SLASSERT(result);
-
-    // get the play interface
-    result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_PLAY, &bqPlayerPlay);
-    SLASSERT(result);
-
-    // get the buffer queue interface
-    result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_BUFFERQUEUE,
-                                             &bqPlayerBufferQueue);
-    SLASSERT(result);
-
-    // register callback on the buffer queue
-    result = (*bqPlayerBufferQueue)->RegisterCallback(bqPlayerBufferQueue, bqPlayerCallback, NULL);
-    SLASSERT(result);
-
-    // enqueue the rec buffer
-    result = (*bqPlayerBufferQueue)->Enqueue(bqPlayerBufferQueue, recBuf, recSize);
-
-    // set the player's state to playing
-    result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_PLAYING);
-    assert(SL_RESULT_SUCCESS == result);
-    (void)result;
-
-    /* Destroy objects when done */
+//static SLObjectItf outputMixObject = NULL;
+//static SLObjectItf bqPlayerObject = NULL;
+//static SLPlayItf bqPlayerPlay;
+//static SLAndroidSimpleBufferQueueItf bqPlayerBufferQueue;
+//static SLmilliHertz bqPlayerSampleRate = 0;
+//static jint bqPlayerBufSize = 0;
+//
+//void bqPlayerCallback(SLAndroidSimpleBufferQueueItf bq, void *context) {
+//    assert(bq == bqPlayerBufferQueue);
+//    assert(NULL == context);
+//    (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_STOPPED);
+//    pthread_mutex_unlock(&audioEngineLock);
+//}
+//
+//void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioPlayer(JNIEnv* env, jobject obj) {
+//    SLresult result;
+//
+//    //bqPlayerSampleRate
+//    bqPlayerBufSize = recSize;
+//
+//    // configure audio source
+//    SLDataLocator_AndroidSimpleBufferQueue loc_bufq = {SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE, 2};
+//    SLDataFormat_PCM format_pcm = {SL_DATAFORMAT_PCM, 1, SL_SAMPLINGRATE_44_1,
+//                                   SL_PCMSAMPLEFORMAT_FIXED_16, SL_PCMSAMPLEFORMAT_FIXED_16,
+//                                   SL_SPEAKER_FRONT_CENTER, SL_BYTEORDER_LITTLEENDIAN};
+//
+//    SLDataSource audioSrc = {&loc_bufq, &format_pcm};
+//
+//    const SLInterfaceID ids[1] = {SL_IID_ENVIRONMENTALREVERB};
+//    const SLboolean req[1] = {SL_BOOLEAN_FALSE};
+//    result = (*engineItf)->CreateOutputMix(engineItf, &outputMixObject, 1, ids, req);
+//    SLASSERT(result);
+//    result = (*outputMixObject)->Realize(outputMixObject, SL_BOOLEAN_FALSE);
+//    SLASSERT(result);
+//
+//
+//
+//    // configure audio sink
+//    SLDataLocator_OutputMix loc_outmix = {SL_DATALOCATOR_OUTPUTMIX, outputMixObject};
+//    SLDataSink audioSnk = {&loc_outmix, NULL};
+//
+//
+//
+//    /*
+//     * create audio player:
+//     *     fast audio does not support when SL_IID_EFFECTSEND is required, skip it
+//     *     for fast audio case
+//     */
+//    const SLInterfaceID ids2[3] = {SL_IID_BUFFERQUEUE, SL_IID_VOLUME, SL_IID_EFFECTSEND,
+//            /*SL_IID_MUTESOLO,*/};
+//    const SLboolean req2[3] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE,
+//            /*SL_BOOLEAN_TRUE,*/ };
+//
+//    result = (*engineItf)->CreateAudioPlayer(engineItf, &bqPlayerObject, &audioSrc, &audioSnk,
+//                                                bqPlayerSampleRate ? 2 : 3, ids2, req2);
+//    SLASSERT(result);
+//
+//    // realize the player
+//    result = (*bqPlayerObject)->Realize(bqPlayerObject, SL_BOOLEAN_FALSE);
+//    SLASSERT(result);
+//
+//    // get the play interface
+//    result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_PLAY, &bqPlayerPlay);
+//    SLASSERT(result);
+//
+//    // get the buffer queue interface
+//    result = (*bqPlayerObject)->GetInterface(bqPlayerObject, SL_IID_BUFFERQUEUE,
+//                                             &bqPlayerBufferQueue);
+//    SLASSERT(result);
+//
+//    // register callback on the buffer queue
+//    result = (*bqPlayerBufferQueue)->RegisterCallback(bqPlayerBufferQueue, bqPlayerCallback, NULL);
+//    SLASSERT(result);
+//
+//    // enqueue the rec buffer
+//    result = (*bqPlayerBufferQueue)->Enqueue(bqPlayerBufferQueue, recBuf, recSize);
+//
+//    // set the player's state to playing
+//    result = (*bqPlayerPlay)->SetPlayState(bqPlayerPlay, SL_PLAYSTATE_PLAYING);
+//    assert(SL_RESULT_SUCCESS == result);
+//    (void)result;
+//
+//    /* Destroy objects when done */
 //
 //    if (outputMixObject) {
 //        (*outputMixObject)->Destroy(outputMixObject);
@@ -437,8 +463,8 @@ void Java_com_stilt_stoytek_stilt_audiorec_AudioRecorder_createAudioPlayer(JNIEn
 //        bqPlayerPlay = NULL;
 //        bqPlayerBufferQueue = NULL;
 //    }
-
-}
+//
+//}
 
 
 

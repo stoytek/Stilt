@@ -7,6 +7,7 @@ import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.util.Log;
 import com.stilt.stoytek.stilt.audiorec.AudioRecorder;
+import com.stilt.stoytek.stilt.audiorec.AudioRecorderWorker;
 import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
 import com.stilt.stoytek.stilt.db.SoundlevelInfoDataSource;
 import com.stilt.stoytek.stilt.dtypes.SoundlevelMeasurement;
@@ -16,12 +17,9 @@ import com.stilt.stoytek.stilt.audiorec.AudioCallback;
 
 public class MainActivity extends FragmentActivity implements AudioCallback, LydbelastningsFragment.OnLydbelastningListener {
 
-    AudioRecorder audiorec;
-    SoundlevelInfoDataSource funfactSource;
-    SoundlevelDataSource soundLevelSource;
     ViewPager viewpager;
     PagerAdapter padapter;
-
+    AudioRecorderWorker worker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +30,6 @@ public class MainActivity extends FragmentActivity implements AudioCallback, Lyd
         viewpager = (ViewPager) findViewById(R.id.activity_main);
         padapter = new PagerAdapter(getSupportFragmentManager());
         viewpager.setAdapter(padapter);
-
 
         Log.wtf("Main", "samma d");
 
@@ -46,11 +43,8 @@ public class MainActivity extends FragmentActivity implements AudioCallback, Lyd
 //        }
 //        lydbelastningsFragment.setFunFact();
 
-        
-
-        audiorec = new AudioRecorder();
-        funfactSource = new SoundlevelInfoDataSource(this.getApplicationContext());
-        soundLevelSource = new SoundlevelDataSource(this.getApplicationContext());
+        worker = new AudioRecorderWorker(this);
+        worker.start();
 
     }
 

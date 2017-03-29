@@ -16,7 +16,13 @@ cmake_minimum_required(VERSION 3.4.1)
 #             # file are automatically included.
 #             src/main/cpp/name-of-lib.cpp )
 
-add_library(audiorec SHARED src/main/cpp/audio-recorder-jni.c)
+add_library(audiorec
+            SHARED
+            src/main/cpp/audio-recorder-jni.c
+            src/main/cpp/sigproc.c
+            src/main/cpp/impulse.c)
+
+include_directories(src/main/cpp/)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because system libraries are included in the search path by
