@@ -28,12 +28,18 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
     private Lock lock;
     private Condition audioReady;
 
+    private Object mPauseLock;
+    private boolean mPaused = false;
+
+
+
     public AudioRecorderWorker(Context context) {
         slSrc = new SoundlevelDataSource(context);
         keepAlive = true;
         lock = new ReentrantLock();
         audioReady = lock.newCondition();
         audioRecorder = new AudioRecorder();
+        mPauseLock = new Object();
     }
 
     @Override
@@ -71,6 +77,16 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
                 /* TODO: Handle exception */
             }
 
+            while (mPaused) {
+                synchronized (mPauseLock) {
+                    try {
+                        mPauseLock.wait();
+                    } catch (InterruptedException e) {
+
+                    }
+                }
+            }
+
         }
 
     }
@@ -87,5 +103,20 @@ public class AudioRecorderWorker extends Thread implements AudioCallback {
 
     public void kill() {
         keepAlive = false;
+    }
+
+    public void onPause() {
+        synchronized (mPauseLock) {
+            mPaused = true;
+        }
+
+    }
+
+    public void onResume() {
+        synchronized (mPauseLock) {
+            mPaused = false;
+            mPauseLock.notifyAll();
+        }
+
     }
 }

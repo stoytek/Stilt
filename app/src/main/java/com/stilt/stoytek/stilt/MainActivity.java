@@ -58,4 +58,16 @@ public class MainActivity extends FragmentActivity implements AudioCallback, Lyd
     public void notifyAudioReady() {
 
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        worker.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        worker.onResume();
+    }
 }

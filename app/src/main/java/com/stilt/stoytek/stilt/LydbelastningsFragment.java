@@ -30,6 +30,7 @@ public class LydbelastningsFragment extends Fragment {
     TextView funfactText;
     OnLydbelastningListener mListener;
     Activity mActivity;
+    SoundlevelDataSource slSrc;
 
     private int counter = 0;
 
@@ -39,7 +40,11 @@ public class LydbelastningsFragment extends Fragment {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
             if (funfactText != null) {
-                funfactText.setText(""+counter++);
+                slSrc.open();
+                SoundlevelMeasurement slm = slSrc.getMostRecentMeasurement();
+
+                funfactText.setText(""+slm.getdBval());
+                slSrc.close();
             }
         }
         else {
@@ -49,6 +54,9 @@ public class LydbelastningsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        slSrc = new SoundlevelDataSource(this.getContext());
+
         View view = inflater.inflate(R.layout.lydbelastningsview,container,false);
 
 

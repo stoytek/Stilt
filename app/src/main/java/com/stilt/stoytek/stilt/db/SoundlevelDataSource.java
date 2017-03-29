@@ -230,4 +230,20 @@ public class SoundlevelDataSource {
         return result;
     }
 
+    public SoundlevelMeasurement getMostRecentMeasurement() {
+        Cursor cursor = db.rawQuery(
+                "select * from "
+              + SoundlevelSQLiteHelper.TABLE_SOUNDLEVELS
+              + " order by "
+              + SoundlevelSQLiteHelper.COLUMN_TIMESTAMP
+              + " DESC",
+                null
+        );
+
+        cursor.moveToFirst();
+        SoundlevelMeasurement slm = cursorToSoundLevelMeasurement(cursor);
+        cursor.close();
+        return slm;
+    }
+
 }
