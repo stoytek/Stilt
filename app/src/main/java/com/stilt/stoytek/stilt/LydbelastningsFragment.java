@@ -17,8 +17,11 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
+import com.stilt.stoytek.stilt.db.SoundlevelDataSource;
+import com.stilt.stoytek.stilt.dtypes.SoundlevelMeasurement;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.Random;
 
 public class LydbelastningsFragment extends Fragment {
@@ -146,6 +149,16 @@ public class LydbelastningsFragment extends Fragment {
     public void setFunFact() {
         funfactText.setText("IT'S WORKING!!");
     }
+
+    public void updateGraph() {
+        SoundlevelDataSource soundlevelsrc = new SoundlevelDataSource(this.getActivity().getApplicationContext());
+        soundlevelsrc.open();
+        GregorianCalendar now = new GregorianCalendar();
+        now.setTimeInMillis(System.currentTimeMillis());
+        ArrayList<SoundlevelMeasurement> list = soundlevelsrc.getSoundlevelMeasurementsFrom24HourWindowBeforeDate(now);
+        soundlevelsrc.close();
+    }
+
 
     //API Level >= 23
     @Override
