@@ -40,7 +40,7 @@ static SLAndroidSimpleBufferQueueItf recBufq;
  * the buffer is full, this ensures that we get exactly 1 second of audio each time
  * startRecording() is called.
  */
-#define RECORD_BUF_SIZE (44100)
+#define RECORD_BUF_SIZE (44100/2)
 
 static short recBuf[RECORD_BUF_SIZE];
 static unsigned recSize = 0;

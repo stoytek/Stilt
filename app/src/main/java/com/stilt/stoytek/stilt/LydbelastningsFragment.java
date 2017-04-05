@@ -2,6 +2,7 @@ package com.stilt.stoytek.stilt;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -155,6 +156,14 @@ public class LydbelastningsFragment extends Fragment {
         };
 
         funfactText = (TextView) view.findViewById(R.id.funfactText);
+
+        funfactText.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                Intent dbmanager = new Intent(getActivity(),AndroidDatabaseManager.class);
+                startActivity(dbmanager);
+            }
+        });
 
         Random rand = new Random();
         int randomNum = rand.nextInt((2) + 1);
